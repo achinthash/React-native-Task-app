@@ -1,3 +1,32 @@
+import {
+  deleteTask,
+  getTaskById,
+  updateTask,
+  updateTaskStatus,
+} from "@/database/tasksService";
+
+import { Ionicons } from "@expo/vector-icons";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Button, Menu, PaperProvider } from "react-native-paper";
+import { TimePickerModal } from "react-native-paper-dates";
+
+import { SafeAreaView } from "react-native-safe-area-context";
+import CategorySelect from "./categorySelect";
+import DateSelect from "./dateSelect";
+
 type Task = {
   id: number;
   title: string;
@@ -20,36 +49,6 @@ type Category = {
   icon: string;
   color: string;
 };
-
-type TaskStatus = "pending" | "completed";
-
-import {
-  deleteTask,
-  getTaskById,
-  updateTask,
-  updateTaskStatus,
-} from "@/database/tasksService";
-import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { Button, Menu, PaperProvider } from "react-native-paper";
-import { TimePickerModal } from "react-native-paper-dates";
-
-import { SafeAreaView } from "react-native-safe-area-context";
-import CategorySelect from "./categorySelect";
-import DateSelect from "./dateSelect";
 
 export default function TaskDetailsScreen() {
   const { id } = useLocalSearchParams();
@@ -88,7 +87,7 @@ export default function TaskDetailsScreen() {
           setNote(response.note || "");
           setPriority(response.priority);
           setStatus(response.status);
-          setSelectedTime(response.time);
+          setSelectedTime(response.time ?? null);
           setSelectedDate(response.scheduled_date);
 
           if (response.category_id) {
@@ -98,6 +97,8 @@ export default function TaskDetailsScreen() {
               icon: response.category_icon || " list",
               color: response.category_color || "#000",
             });
+          } else {
+            setSelectedCategory(null);
           }
         }
       } catch (error) {
@@ -119,7 +120,7 @@ export default function TaskDetailsScreen() {
 
   const onDismiss = useCallback(() => {
     setTimeModalVisible(false);
-  }, [setTimeModalVisible]);
+  }, []);
 
   const handleTimeConfirm = ({ hours, minutes }: any) => {
     const formattedTime = `${hours.toString().padStart(2, "0")}:${minutes
@@ -129,8 +130,6 @@ export default function TaskDetailsScreen() {
     setSelectedTime(formattedTime);
     setTimeModalVisible(false);
   };
-
-  console.log(id);
 
   // 2. Add a useEffect for Auto-saving (Debounced)
   useEffect(() => {
@@ -143,7 +142,8 @@ export default function TaskDetailsScreen() {
       selectedTime !== initialTask.time ||
       priority !== initialTask.priority ||
       status !== initialTask.status ||
-      selectedCategory?.id !== initialTask.category_id;
+      Number(selectedCategory?.id ?? null) !==
+        Number(initialTask.category_id ?? null);
 
     if (!hasChanged) return;
 
@@ -156,9 +156,20 @@ export default function TaskDetailsScreen() {
           selectedTime ?? "",
           priority,
           status,
-          Number(selectedCategory?.id),
+          selectedCategory?.id ?? null,
           Number(id),
         );
+
+        setInitialTask({
+          ...initialTask!,
+          title,
+          note,
+          scheduled_date: selectedDate,
+          time: selectedTime,
+          priority,
+          status,
+          category_id: selectedCategory ? selectedCategory.id : null,
+        });
         console.log("Auto-saved changes");
       } catch (error) {
         console.error("Failed to auto-save:", error);
@@ -174,6 +185,9 @@ export default function TaskDetailsScreen() {
     priority,
     status,
     selectedCategory,
+    task,
+    initialTask,
+    id,
   ]);
 
   // delete category
@@ -211,13 +225,16 @@ export default function TaskDetailsScreen() {
   };
 
   const markStatus = async (id: number) => {
+    const prevStatus = status;
     const newStatus = status === "completed" ? "pending" : "completed";
+
     setStatus(newStatus);
 
     try {
       await updateTaskStatus(id, newStatus);
     } catch (error) {
       console.log(error);
+      setStatus(prevStatus); // rollback
     }
   };
 
@@ -344,7 +361,7 @@ export default function TaskDetailsScreen() {
 
           <Menu
             visible={visibleMenu}
-            onDismiss={() => setVisibleMenu(!visibleMenu)}
+            onDismiss={() => setVisibleMenu(false)}
             contentStyle={{
               backgroundColor: "white",
               borderRadius: 8,
@@ -410,7 +427,7 @@ export default function TaskDetailsScreen() {
               <View className={` py-1 rounded-md`}>
                 <Menu
                   visible={visiblePriority}
-                  onDismiss={() => setVisiblePriority(!visiblePriority)}
+                  onDismiss={() => setVisiblePriority(false)}
                   contentStyle={{ backgroundColor: "white", borderRadius: 8 }}
                   anchor={
                     <View className="px-3 py-2 rounded-md bg-gray-100 flex-row items-center">

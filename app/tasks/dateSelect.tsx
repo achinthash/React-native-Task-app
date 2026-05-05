@@ -1,18 +1,11 @@
 import { Feather, MaterialIcons } from "@expo/vector-icons";
-import React, { useCallback, useEffect, useState } from "react";
-import { Dimensions, Pressable, Text, View } from "react-native";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Pressable, Text, useWindowDimensions, View } from "react-native";
 
 import { PaperProvider } from "react-native-paper";
 import { TimePickerModal } from "react-native-paper-dates";
 
-import { useWindowDimensions } from "react-native";
 import { CalendarList, DateData } from "react-native-calendars";
-
-// Inside your component:
-const { width: screenWidth } = useWindowDimensions();
-
-// If it's inside a Modal with padding, subtract the padding:
-const CALENDAR_WIDTH = screenWidth - 60; // Example: 20px padding on each side
 
 type Props = {
   selectedDate: string;
@@ -27,15 +20,15 @@ export default function DateSelect({
   selectedDate,
   selectedTime,
 }: Props) {
-  const screenWidth = Dimensions.get("window").width;
+  const { width: screenWidth } = useWindowDimensions();
+
+  const CALENDAR_WIDTH = useMemo(() => screenWidth - 60, [screenWidth]);
 
   const [isTimeModalVisible, setTimeModalVisible] = useState(false);
-  const [tempDate, setTempDate] = useState(selectedDate);
-  const [tempTime, setTempTime] = useState(selectedTime);
-
-  const day = new Date();
-
-  console.log(selectedDate);
+  const [tempDate, setTempDate] = useState(
+    selectedDate || new Date().toISOString().split("T")[0],
+  );
+  const [tempTime, setTempTime] = useState<string | null>(selectedTime);
 
   const onDismiss = useCallback(() => {
     setTimeModalVisible(false);
@@ -185,10 +178,10 @@ export default function DateSelect({
       <View className="flex flex-row p-4 w-full gap-3 flex-wrap ">
         <Pressable
           onPress={() => setTempDate(today)}
-          className={`px-3 rounded-md  text-white ${tempDate == today ? "bg-blue-400" : "bg-gray-200"} `}
+          className={`px-3 rounded-md  text-white ${tempDate === today ? "bg-blue-400" : "bg-gray-200"} `}
         >
           <Text
-            className={` py-3 text-sm px-2 ${tempDate == today ? "text-white" : "text-gray-500"} `}
+            className={` py-3 text-sm px-2 ${tempDate === today ? "text-white" : "text-gray-500"} `}
           >
             Today
           </Text>
@@ -196,10 +189,10 @@ export default function DateSelect({
 
         <Pressable
           onPress={() => setTempDate(tomorrow)}
-          className={`px-3 rounded-md  text-white ${tempDate == tomorrow ? "bg-blue-400" : "bg-gray-200"} `}
+          className={`px-3 rounded-md  text-white ${tempDate === tomorrow ? "bg-blue-400" : "bg-gray-200"} `}
         >
           <Text
-            className={` py-3 text-sm px-2 ${tempDate == tomorrow ? "text-white" : "text-gray-500"} `}
+            className={` py-3 text-sm px-2 ${tempDate === tomorrow ? "text-white" : "text-gray-500"} `}
           >
             Tomorrow
           </Text>
@@ -207,10 +200,10 @@ export default function DateSelect({
 
         <Pressable
           onPress={() => setTempDate(threeDaysLater)}
-          className={`px-3 rounded-md  text-white ${tempDate == threeDaysLater ? "bg-blue-400" : "bg-gray-200"} `}
+          className={`px-3 rounded-md  text-white ${tempDate === threeDaysLater ? "bg-blue-400" : "bg-gray-200"} `}
         >
           <Text
-            className={` py-3 text-sm px-2 ${tempDate == threeDaysLater ? "text-white" : "text-gray-500"} `}
+            className={` py-3 text-sm px-2 ${tempDate === threeDaysLater ? "text-white" : "text-gray-500"} `}
           >
             3 Days Later
           </Text>
@@ -218,10 +211,10 @@ export default function DateSelect({
 
         <Pressable
           onPress={() => setTempDate(thisSunday)}
-          className={`px-3 rounded-md  text-white ${selectedDate == thisSunday ? "bg-blue-400" : "bg-gray-200"} `}
+          className={`px-3 rounded-md  text-white ${tempDate === thisSunday ? "bg-blue-400" : "bg-gray-200"} `}
         >
           <Text
-            className={` py-3 text-sm px-2 ${selectedDate == thisSunday ? "text-white" : "text-gray-500"} `}
+            className={` py-3 text-sm px-2 ${tempDate === thisSunday ? "text-white" : "text-gray-500"} `}
           >
             This Sunday
           </Text>

@@ -1,4 +1,4 @@
-import { useFocusEffect } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   FlatList,
@@ -28,8 +28,6 @@ type Category = {
   color: string;
   icon: string;
 };
-
-import { router } from "expo-router";
 
 export default function TasksList() {
   const [isLoading, setIsLoading] = useState(false);
@@ -72,7 +70,7 @@ export default function TasksList() {
   };
 
   // fetch categories
-  const fetchAllCategories = async () => {
+  const fetchAllCategories = useCallback(async () => {
     try {
       const response = await getAllCategories();
       setCategories(response ?? []);
@@ -80,10 +78,10 @@ export default function TasksList() {
       console.log(error);
       setCategories([]);
     }
-  };
+  }, []);
 
   // fetch tasks
-  const fetchAllTasks = async () => {
+  const fetchAllTasks = useCallback(async () => {
     try {
       const response = await getTasks(500);
       setTasks(response?.tasks ?? []);
@@ -91,23 +89,23 @@ export default function TasksList() {
       console.log(error);
       setTasks([]);
     }
-  };
+  }, []);
 
-  useFocusEffect(
-    useCallback(() => {
-      // This runs every time you navigate BACK to this screen
-      init();
-    }, []),
-  );
-
-  const init = async () => {
+  const init = useCallback(async () => {
     setIsLoading(true);
     try {
       await Promise.all([fetchAllCategories(), fetchAllTasks()]);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [fetchAllCategories, fetchAllTasks]);
+
+  useFocusEffect(
+    useCallback(() => {
+      // This runs every time you navigate BACK to this screen
+      init();
+    }, [init]),
+  );
 
   const myCatgoies: Category[] = [
     { color: "#7C6FFF", icon: "school", id: "all", name: "All" },
@@ -286,7 +284,9 @@ export default function TasksList() {
     const categoryColor = item.category_color || "#6b7280";
     const isCompleted = item.status === "completed";
 
-    const priority = PRIORITY_CONFIG[item.priority as 1 | 2 | 3];
+    const priority =
+      PRIORITY_CONFIG[item.priority as keyof typeof PRIORITY_CONFIG] ??
+      PRIORITY_CONFIG[0];
 
     return (
       <TouchableOpacity
@@ -425,6 +425,8 @@ export default function TasksList() {
         keyExtractor={(item) => String(item.id)}
         renderItem={renderItem}
         renderSectionHeader={renderHeader}
+        refreshing={isLoading}
+        onRefresh={init}
         stickySectionHeadersEnabled
         onEndReachedThreshold={0.3}
         initialNumToRender={10}
