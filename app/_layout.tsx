@@ -8,6 +8,8 @@ import * as Notifications from "expo-notifications";
 import { useEffect } from "react";
 import { Platform } from "react-native";
 
+import { ThemeProvider } from "@/context/ThemeContext";
+
 Notifications.setNotificationHandler({
   handleNotification:
     async (): Promise<Notifications.NotificationBehavior> => ({
@@ -45,28 +47,30 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <BottomSheetModalProvider>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" />
+    <ThemeProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <BottomSheetModalProvider>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" />
 
-          <Stack.Screen
-            name="tasks/newTasks"
-            options={{
-              // presentation: "formSheet",
-              title: "new",
-              headerShown: false,
-              headerTitleAlign: "center",
-              presentation: "formSheet", //  use this first
-              gestureEnabled: true, // ensure swipe works
-              headerTitleStyle: {
-                fontSize: 26,
-                fontWeight: "bold",
-              },
-            }}
-          />
-        </Stack>
-      </BottomSheetModalProvider>
-    </GestureHandlerRootView>
+            <Stack.Screen
+              name="tasks/newTasks"
+              options={{
+                // presentation: "formSheet",
+                title: "new",
+                headerShown: false,
+                headerTitleAlign: "center",
+                presentation: "formSheet", //  use this first
+                gestureEnabled: true, // ensure swipe works
+                headerTitleStyle: {
+                  fontSize: 26,
+                  fontWeight: "bold",
+                },
+              }}
+            />
+          </Stack>
+        </BottomSheetModalProvider>
+      </GestureHandlerRootView>
+    </ThemeProvider>
   );
 }

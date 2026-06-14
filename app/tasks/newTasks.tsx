@@ -1,3 +1,4 @@
+import { useTheme } from "@/context/ThemeContext";
 import { createTask } from "@/database/tasksService";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -28,6 +29,7 @@ type Category = {
 type TaskStatus = "pending" | "completed";
 
 export default function NewTasks() {
+  const { theme } = useTheme();
   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
   const [isDateModalVisible, setDateModalVisible] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(
@@ -146,7 +148,15 @@ export default function NewTasks() {
         animationType="fade"
       >
         <View style={styles.overlay}>
-          <View style={{}} className="w-[90%] bg-[#fff] rounded-2xl p-4">
+          <View
+            // style={{ backgroundColor: "#000000" }}
+            className="w-[90%]   rounded-2xl p-4"
+            style={{
+              backgroundColor: theme.surface,
+              borderWidth: 1,
+              borderColor: theme.border,
+            }}
+          >
             <DateSelect
               onCancel={() => setDateModalVisible(false)}
               selectedDate={selectedDate}
@@ -177,7 +187,14 @@ export default function NewTasks() {
           {/* INSIDE (prevent close) */}
           <Pressable
             onPress={(e) => e.stopPropagation()}
-            style={styles.modalContainer}
+            style={[
+              styles.modalContainer,
+              {
+                backgroundColor: theme.surface,
+                borderColor: theme.border,
+                borderWidth: 1,
+              },
+            ]}
           >
             <CategorySelect
               setSelectedCategory={setSelectedCategory}
@@ -202,15 +219,26 @@ export default function NewTasks() {
           {/* INSIDE (prevent close) */}
           <Pressable
             onPress={(e) => e.stopPropagation()}
-            style={styles.modalContainer}
+            style={[
+              styles.modalContainer,
+              { backgroundColor: theme.surface, width: "90%" },
+            ]}
           >
             <View className="flex-col">
               <View className="flex-row justify-between items-center mb-2">
-                <Text className="text-lg font-bold text-gray-700">
+                <Text
+                  style={{
+                    color: theme.text,
+                    fontSize: 18,
+                    fontWeight: "bold",
+                  }}
+                >
                   Add Note
                 </Text>
                 <Pressable onPress={() => setNoteModalVisible(false)}>
-                  <Text className="text-blue-500 font-semibold">Done</Text>
+                  <Text style={{ color: theme.primary, fontWeight: "600" }}>
+                    Done
+                  </Text>
                 </Pressable>
               </View>
 
@@ -221,8 +249,13 @@ export default function NewTasks() {
                 multiline
                 textAlignVertical="top"
                 autoFocus={true}
-                className="text-base text-gray-800 bg-gray-50 p-4 rounded-xl"
-                style={{ minHeight: 220, maxHeight: 220 }}
+                style={{
+                  minHeight: 220,
+                  maxHeight: 220,
+                  backgroundColor: theme.surfaceSecondary,
+                  color: theme.text,
+                  fontSize: 16,
+                }}
               />
             </View>
           </Pressable>
@@ -240,40 +273,66 @@ export default function NewTasks() {
           style={styles.overlay}
           onPress={() => setPriorityModalVisible(false)}
         >
-          <View style={styles.modalContainer} className="w-[80%]">
-            <Text className="font-bold text-center mb-4 text-xl">
+          <View
+            style={[
+              styles.modalContainer,
+              { backgroundColor: theme.surface, width: "80%" },
+            ]}
+          >
+            <Text
+              style={{
+                color: theme.text,
+                fontWeight: "bold",
+                textAlign: "center",
+                marginBottom: 16,
+                fontSize: 20,
+              }}
+            >
               Select Priority
             </Text>
 
-            {Object.entries(PRIORITY_MAP).map(([key, value]) => (
-              <Pressable
-                key={key}
-                className="py-4 border-b border-gray-100 flex-row justify-between items-center"
-                onPress={() => {
-                  setPriority(Number(key));
-                  setPriorityModalVisible(false);
-                }}
-              >
-                <Text
-                  className="text-base font-medium"
+            {Object.entries(PRIORITY_MAP).map(([key, value]) => {
+              // Dynamic priority coloring based on theme if possible, or standard status colors
+              const getPriorityColor = () => {
+                if (value.label.toLowerCase().includes("high"))
+                  return theme.danger;
+                if (value.label.toLowerCase().includes("med"))
+                  return theme.warning;
+                return theme.success;
+              };
+
+              return (
+                <Pressable
+                  key={key}
+                  className="py-4 flex-row justify-between items-center"
                   style={{
-                    color:
-                      value.color === "text-green-500"
-                        ? "#22c55e"
-                        : value.color === "text-yellow-600"
-                          ? "#ca8a04"
-                          : value.color === "text-red-500"
-                            ? "#ef4444"
-                            : "black",
+                    borderBottomWidth: 1,
+                    borderBottomColor: theme.border,
+                  }}
+                  onPress={() => {
+                    setPriority(Number(key));
+                    setPriorityModalVisible(false);
                   }}
                 >
-                  {value.label}
-                </Text>
-                {priority === Number(key) && (
-                  <Ionicons name="checkmark" size={20} color="#3b82f6" />
-                )}
-              </Pressable>
-            ))}
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "500",
+                      color: getPriorityColor(),
+                    }}
+                  >
+                    {value.label}
+                  </Text>
+                  {priority === Number(key) && (
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={22}
+                      color={theme.primary}
+                    />
+                  )}
+                </Pressable>
+              );
+            })}
           </View>
         </Pressable>
       </Modal>
@@ -286,12 +345,16 @@ export default function NewTasks() {
           numberOfLines={5}
           value={title}
           onChangeText={setTitle}
-          className="bg-gray-100 border border-gray-300 rounded-lg p-3 text-xl "
+          className="  rounded-lg p-3  "
           style={{
             minHeight: 70,
             maxHeight: 70,
             fontSize: 16,
             textAlignVertical: "top",
+            backgroundColor: theme.surfaceSecondary,
+            color: theme.text,
+            borderWidth: 1,
+            borderColor: theme.border,
           }}
         />
 
@@ -300,46 +363,65 @@ export default function NewTasks() {
           <View className="flex-row items-center gap-2">
             <Pressable
               onPress={() => setCategoryModalVisible(true)}
-              className="px-3 py-2 rounded-md bg-gray-100"
+              className="px-3 py-2 rounded-md "
+              style={{
+                backgroundColor: theme.primarySoft,
+              }}
             >
-              <Text>{selectedCategory?.name || "No Category"}</Text>
+              <Text
+                style={{
+                  color: theme.primaryDark,
+                  fontWeight: "500",
+                  fontSize: 14,
+                }}
+              >
+                {selectedCategory?.name || "No Category"}
+              </Text>
             </Pressable>
 
             <Pressable
               onPress={() => setDateModalVisible(true)}
-              className="p-2 rounded-md bg-gray-100"
+              className="p-2 rounded-xl"
+              style={{ backgroundColor: theme.primarySoft }}
             >
-              <Ionicons name="calendar-outline" size={20} color="black" />
+              <Ionicons name="calendar" size={18} color={theme.primaryDark} />
             </Pressable>
 
             <Pressable
               onPress={() => setNoteModalVisible(true)}
-              className="p-2 rounded-md bg-gray-100"
+              className="p-2 rounded-md "
+              style={{ backgroundColor: theme.primarySoft }}
             >
-              <Ionicons name="document-text-outline" size={20} color="black" />
+              <Ionicons
+                name="document-text-outline"
+                size={18}
+                color={theme.primaryDark}
+              />
             </Pressable>
 
             {/* Priority */}
             <Pressable
               onPress={() => setPriorityModalVisible(true)}
-              className="px-3 py-2 rounded-md bg-gray-100 flex-row items-center"
+              className="px-3 py-2 rounded-md  flex-row items-center"
+              style={{ backgroundColor: theme.primarySoft }}
             >
-              <Text className="text-sm font-medium">
+              <Text
+                style={{
+                  color: theme.primaryDark,
+                  fontWeight: "500",
+                  fontSize: 14,
+                }}
+              >
                 {PRIORITY_MAP[priority]?.label}
               </Text>
-              <Ionicons
-                name="chevron-down"
-                size={14}
-                color="#999"
-                style={{ marginLeft: 4 }}
-              />
             </Pressable>
           </View>
 
           {/* RIGHT SIDE */}
           <Pressable
             onPress={submitTask}
-            className="p-3.5 rounded-full bg-blue-400 "
+            className="p-3.5 rounded-full  "
+            style={{ backgroundColor: theme.primary }}
           >
             <FontAwesome5
               className="rotate-45"

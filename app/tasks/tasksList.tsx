@@ -12,6 +12,7 @@ import {
 
 // import { View, Text, TouchableOpacity } from 'react-native';
 
+import { useTheme } from "@/context/ThemeContext";
 import {
   getAllCategories,
   getTasks,
@@ -30,6 +31,7 @@ type Category = {
 };
 
 export default function TasksList() {
+  const { theme } = useTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -108,9 +110,9 @@ export default function TasksList() {
   );
 
   const myCatgoies: Category[] = [
-    { color: "#7C6FFF", icon: "school", id: "all", name: "All" },
+    { color: theme.primary, icon: "school", id: "all", name: "All" },
     {
-      color: "#6b7280",
+      color: theme.mutedText,
       icon: "close-circle-outline",
       id: "no-category",
       name: "No Category",
@@ -175,18 +177,18 @@ export default function TasksList() {
   const SECTION_CONFIG = {
     Previous: {
       icon: "checkmark-done-outline",
-      color: "#059669",
-      bg: "#ecfdf5",
+      color: theme.primary,
+      bg: theme.primarySoft,
     },
     Today: {
       icon: "today-outline",
-      color: "#2563eb",
-      bg: "#eff6ff",
+      color: theme.primary,
+      bg: theme.primarySoft,
     },
     Future: {
       icon: "time-outline",
-      color: "#64748b",
-      bg: "#f1f5f9",
+      color: theme.primary,
+      bg: theme.primarySoft,
     },
   } as const;
 
@@ -214,16 +216,16 @@ export default function TasksList() {
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.05,
           shadowRadius: 8,
-          elevation: 3,
+          elevation: 0,
           borderWidth: 1,
-          borderColor: "#F3F4F6", // Subtle border for definition
+          borderColor: theme.border,
         }}
       >
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           {/* Optional: Add a subtle icon background */}
           <View
             style={{
-              backgroundColor: "#F3F4F6",
+              backgroundColor: theme.surface,
               padding: 6,
               borderRadius: 8,
               marginRight: 12,
@@ -293,27 +295,48 @@ export default function TasksList() {
         onPress={() => taskDetails(item.id)}
         style={[
           styles.taskCard,
-          { borderLeftWidth: 4, borderLeftColor: priority.color },
+          {
+            backgroundColor: theme.surface,
+            borderColor: theme.border,
+            borderLeftWidth: 4,
+            borderLeftColor: priority.color,
+          },
         ]}
         activeOpacity={0.8}
       >
         <View style={styles.taskRow}>
-          <Pressable onPress={() => markStatus(item.id)}>
+          <Pressable
+            onPress={() => markStatus(item.id)}
+            style={[
+              styles.statusButton,
+              {
+                backgroundColor: isCompleted
+                  ? `${theme.success}18`
+                  : theme.primarySoft,
+                borderColor: isCompleted ? theme.success : theme.border,
+              },
+            ]}
+          >
             <Ionicons
               name={isCompleted ? "checkmark-circle" : "ellipse-outline"}
-              size={26}
-              color={isCompleted ? "#10b981" : "#cbd5e1"}
+              size={24}
+              color={isCompleted ? theme.success : theme.primary}
             />
           </Pressable>
 
           <View style={styles.textContainer}>
             <Text
-              style={[styles.taskTitle, isCompleted && styles.completedText]}
+              style={[
+                styles.taskTitle,
+                { color: theme.text },
+                isCompleted && { color: theme.mutedText },
+                isCompleted && styles.completedText,
+              ]}
             >
               {item.title}
             </Text>
 
-            <Text className="text-xs mt-1">
+            <Text style={[styles.noteText, { color: theme.mutedText }]}>
               {item.note ? `${item.note.slice(0, 20)}...` : " "}
             </Text>
             {/* note goes here   */}
@@ -350,8 +373,12 @@ export default function TasksList() {
                 {/* <Ionicons name="attach-outline" size={14} color="#94a3b8" /> */}
 
                 <View className="flex-row items-center">
-                  <Ionicons name="time-outline" size={14} color="#94a3b8" />
-                  <Text className="text-slate-400 text-[12px] ml-1">
+                  <Ionicons
+                    name="time-outline"
+                    size={14}
+                    color={theme.mutedText}
+                  />
+                  <Text style={[styles.dateText, { color: theme.mutedText }]}>
                     {item.scheduled_date}
                     {item.time ? ` : ${item.time}` : ""}
                   </Text>
@@ -365,9 +392,11 @@ export default function TasksList() {
   };
 
   return (
-    <View className="p-2 ">
+    <View style={styles.container}>
       <FlatList
         horizontal
+        style={styles.categoryList}
+        contentContainerStyle={styles.categoryContent}
         // refreshing={isLoading}
         // onRefresh={getcateall}
         showsHorizontalScrollIndicator={false}
@@ -376,18 +405,18 @@ export default function TasksList() {
           const isActive = activeCategory === item.id;
           return (
             <Pressable
-              className="mb-2"
               onPress={() => setActiveCategory(item.id)}
               style={[
                 {
                   marginRight: 8,
+                  marginBottom: 8,
                   borderWidth: 1.5,
                   flexDirection: "row",
                   alignItems: "center",
                   paddingHorizontal: 16,
                   paddingVertical: 8,
                   borderRadius: 20,
-                  backgroundColor: "#F3F4F6",
+                  backgroundColor: theme.surface,
                   gap: 6,
                 },
                 isActive && {
@@ -408,7 +437,6 @@ export default function TasksList() {
                   {
                     fontSize: 13,
                     fontWeight: "600",
-                    color: item.color,
                   },
                   { color: isActive ? "#fff" : item.color },
                 ]}
@@ -421,6 +449,7 @@ export default function TasksList() {
       />
 
       <SectionList
+        style={styles.sectionList}
         sections={finalSections}
         keyExtractor={(item) => String(item.id)}
         renderItem={renderItem}
@@ -442,19 +471,47 @@ export default function TasksList() {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 8,
+  },
+  categoryList: {
+    flexGrow: 0,
+    flexShrink: 0,
+    height: 48,
+    maxHeight: 48,
+  },
+  categoryContent: {
+    alignItems: "center",
+  },
+  sectionList: {
+    flex: 1,
+  },
   taskCard: {
-    backgroundColor: "#fff",
-    borderRadius: 20,
+    borderRadius: 18,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: "#f1f5f9",
     elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
   },
   taskRow: { flexDirection: "row", alignItems: "center" },
+  statusButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    borderWidth: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   textContainer: { flex: 1, marginLeft: 15 },
-  taskTitle: { fontSize: 16, fontWeight: "600", color: "#334155" },
-  completedText: { textDecorationLine: "line-through", color: "#cbd5e1" },
+  taskTitle: { fontSize: 16, fontWeight: "600" },
+  completedText: { textDecorationLine: "line-through" },
+  noteText: { fontSize: 12, marginTop: 4 },
+  dateText: { fontSize: 12, marginLeft: 4 },
   metaRow: {
     width: "100%",
     flexDirection: "row",

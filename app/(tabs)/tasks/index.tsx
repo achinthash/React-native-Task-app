@@ -1,115 +1,120 @@
-import { Pressable, View } from "react-native";
-
-// import { useEffect, useRef, useMemo, useState } from "react";
-
-import React, { useCallback, useEffect, useMemo, useRef } from "react";
-
-import { Keyboard } from "react-native";
-
-import AntDesign from "@expo/vector-icons/AntDesign";
-
-import { BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet";
-
 import NewTasks from "@/app/tasks/newTasks";
-
 import TasksList from "@/app/tasks/tasksList";
-
-import { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
+import { useTheme } from "@/context/ThemeContext";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import {
+  BottomSheetBackdrop,
+  BottomSheetModal,
+  BottomSheetScrollView,
+} from "@gorhom/bottom-sheet";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import {
+  ImageBackground,
+  Keyboard,
+  Platform,
+  Pressable,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Tasks() {
+  const { theme } = useTheme();
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-  const snapPoints = useMemo(() => ["55%", "60%"], []);
 
-  const renderBackdrop = (props: any) => (
-    <BottomSheetBackdrop
-      {...props}
-      pressBehavior="close" //  this enables click to close
-      appearsOnIndex={0}
-      disappearsOnIndex={-1}
-    />
+  const snapPoints = useMemo(() => ["60%", "92%"], []);
+
+  useEffect(() => {
+    const showEvent =
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent =
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+    const onShow = () => bottomSheetModalRef.current?.snapToIndex(1);
+    const onHide = () => bottomSheetModalRef.current?.snapToIndex(0);
+
+    const showSub = Keyboard.addListener(showEvent, onShow);
+    const hideSub = Keyboard.addListener(hideEvent, onHide);
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  const renderBackdrop = useCallback(
+    (props: any) => (
+      <BottomSheetBackdrop
+        {...props}
+        pressBehavior="close"
+        appearsOnIndex={0}
+        disappearsOnIndex={-1}
+        opacity={0.4}
+      />
+    ),
+    [],
   );
 
-  // Open the new task
   const handlePresentModalPress = useCallback(() => {
     bottomSheetModalRef.current?.present();
   }, []);
 
-  useEffect(() => {
-    const hide = Keyboard.addListener("keyboardDidHide", () => {
-      bottomSheetModalRef.current?.snapToPosition(200); //custom position 200 px
-    });
-
-    return () => hide.remove();
-  }, []);
-
-  return (
-    <SafeAreaView className="0 flex-1 " edges={["top"]}>
-      {/*Floating new task button  */}
-      <View className="z-10 right-6  bottom-6 absolute">
+  const content = (
+    <SafeAreaView className="flex-1" edges={["top"]}>
+      <View className="absolute bottom-6 right-6 z-10">
         <Pressable
-          className="rounded-full bg-blue-500 p-5"
+          className="rounded-full p-5"
           onPress={handlePresentModalPress}
+          style={{ backgroundColor: theme.primary }}
         >
           <AntDesign name="plus" size={24} color="white" />
         </Pressable>
       </View>
 
-      {/* New task View BottomSheet  */}
-
       <BottomSheetModal
         ref={bottomSheetModalRef}
-        backdropComponent={renderBackdrop}
-        index={1}
+        index={0}
         snapPoints={snapPoints}
-        keyboardBehavior="extend"
-        keyboardBlurBehavior="none" // 👈 Add this: Prevents keyboard from hiding on outside taps
-        android_keyboardInputMode="adjustResize" // 👈 Helps Android handle the layout correctly
-        backgroundStyle={{ backgroundColor: "#ffffff" }}
+        backdropComponent={renderBackdrop}
+        keyboardBlurBehavior="restore"
+        backgroundStyle={{ backgroundColor: theme.surface }}
+        enablePanDownToClose={false}
+        enableHandlePanningGesture={false}
+        enableContentPanningGesture={false}
       >
-        <BottomSheetView style={{ padding: 2 }}>
+        <BottomSheetScrollView
+          contentContainerStyle={{ padding: 10 }}
+          keyboardShouldPersistTaps="handled"
+        >
           <NewTasks />
-        </BottomSheetView>
+        </BottomSheetScrollView>
       </BottomSheetModal>
 
-      {/* <BottomSheetModal
-        ref={bottomSheetModalRef}
-        backdropComponent={renderBackdrop}
-        index={1}
-        snapPoints={snapPoints}
-        keyboardBehavior="extend"
-        // backdropComponent={({ style }) => (
-        //   <View style={[style, { backgroundColor: "#3d3d3d98" }]} />
-        // )}
-        backgroundStyle={{
-          backgroundColor: "#ffffff", // zinc-950 / white
-        }}
-        handleIndicatorStyle={{
-          backgroundColor: "#000000", // zinc-700 / zinc-300
+      <TasksList />
+    </SafeAreaView>
+  );
+
+  if (!theme.backgroundImage) {
+    return (
+      <View style={{ flex: 1, backgroundColor: theme.background }}>
+        {content}
+      </View>
+    );
+  }
+
+  return (
+    <ImageBackground
+      style={{ flex: 1 }}
+      source={theme.backgroundImage}
+      resizeMode={theme.category === "texture" ? "repeat" : "cover"}
+    >
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: "transparent",
         }}
       >
-        <BottomSheetView style={{ padding: 2 }}>
-          <NewTasks />
-        </BottomSheetView>
-      </BottomSheetModal> */}
-
-      <TasksList />
-
-      {/* TASK LIST */}
-      {/* <ScrollView className=" flex-1 bg-white p-2">
-        <View className="mb-8">
-          {tasks &&
-            tasks.map((item) => (
-              <View
-                key={item.id}
-                className="p-3 mb-2 border border-gray-200 rounded-lg"
-              >
-                <Text className="font-bold text-black">{item.title}</Text>
-                <Text className="text-gray-600">{item.note}</Text>
-              </View>
-            ))}
-        </View>
-      </ScrollView> */}
-    </SafeAreaView>
+        {content}
+      </View>
+    </ImageBackground>
   );
 }

@@ -1,11 +1,12 @@
 import NewTasks from "@/app/tasks/newTasks";
+import { useTheme } from "@/context/ThemeContext";
 import { getTasksCalendar } from "@/database/tasksService";
 import { Ionicons } from "@expo/vector-icons";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
-  BottomSheetView,
+  BottomSheetScrollView,
 } from "@gorhom/bottom-sheet";
 import { router, useFocusEffect } from "expo-router";
 import React, {
@@ -17,7 +18,9 @@ import React, {
 } from "react";
 import {
   FlatList,
+  ImageBackground,
   Keyboard,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -57,6 +60,8 @@ interface TaskWithCategory {
   category_color: string | null;
 }
 export default function CalendarScreen() {
+  const { theme } = useTheme();
+
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [tasksByDate, setTasksByDate] = useState<GroupedTasks>({});
 
@@ -125,35 +130,50 @@ export default function CalendarScreen() {
   const selectedTasks = selectedDate ? tasksByDate[selectedDate] || [] : [];
 
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
-  const snapPoints = useMemo(() => ["55%", "60%"], []);
 
-  const renderBackdrop = (props: any) => (
-    <BottomSheetBackdrop
-      {...props}
-      pressBehavior="close" //  this enables click to close
-      appearsOnIndex={0}
-      disappearsOnIndex={-1}
-    />
+  // Make the top snap point high enough to clear the keyboard
+  const snapPoints = useMemo(() => ["60%", "92%"], []);
+
+  // Manually snap UP when keyboard opens, restore when it closes
+  useEffect(() => {
+    const showEvent =
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent =
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+    const onShow = () => bottomSheetModalRef.current?.snapToIndex(1);
+    const onHide = () => bottomSheetModalRef.current?.snapToIndex(0);
+
+    const showSub = Keyboard.addListener(showEvent, onShow);
+    const hideSub = Keyboard.addListener(hideEvent, onHide);
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+  const renderBackdrop = useCallback(
+    (props: any) => (
+      <BottomSheetBackdrop
+        {...props}
+        pressBehavior="close"
+        appearsOnIndex={0}
+        disappearsOnIndex={-1}
+        opacity={0.4}
+      />
+    ),
+    [],
   );
 
-  // Open the new task
   const handlePresentModalPress = useCallback(() => {
     bottomSheetModalRef.current?.present();
-  }, []);
-
-  useEffect(() => {
-    const hide = Keyboard.addListener("keyboardDidHide", () => {
-      bottomSheetModalRef.current?.snapToPosition(200); //custom position 200 px
-    });
-
-    return () => hide.remove();
   }, []);
 
   const taskDetails = async (id: number) => {
     router.push(`/tasks/${id}`);
   };
 
-  return (
+  const content = (
     <SafeAreaView style={styles.container} edges={["top"]}>
       {/*Floating new task button  */}
       <View className="z-10 right-6  bottom-6 absolute">
@@ -169,17 +189,22 @@ export default function CalendarScreen() {
 
       <BottomSheetModal
         ref={bottomSheetModalRef}
-        backdropComponent={renderBackdrop}
-        index={1}
+        index={0}
         snapPoints={snapPoints}
-        keyboardBehavior="extend"
-        keyboardBlurBehavior="none" // 👈 Add this: Prevents keyboard from hiding on outside taps
-        android_keyboardInputMode="adjustResize" // 👈 Helps Android handle the layout correctly
+        backdropComponent={renderBackdrop}
+        // ↓ remove keyboardBehavior entirely — we handle it manually above
+        keyboardBlurBehavior="restore"
         backgroundStyle={{ backgroundColor: "#ffffff" }}
+        enablePanDownToClose={false} // ← disable swipe to close
+        enableHandlePanningGesture={false} // ← disable dragging the handle
+        enableContentPanningGesture={false} // ← disable dragging the content
       >
-        <BottomSheetView style={{ padding: 2 }}>
+        <BottomSheetScrollView
+          contentContainerStyle={{ padding: 10 }}
+          keyboardShouldPersistTaps="handled"
+        >
           <NewTasks />
-        </BottomSheetView>
+        </BottomSheetScrollView>
       </BottomSheetModal>
 
       <View style={styles.container}>
@@ -193,15 +218,43 @@ export default function CalendarScreen() {
               loadMonthTasks(months[0].year, months[0].month);
             }
           }}
+          style={{
+            backgroundColor: "transparent",
+          }}
           markedDates={markedDates}
           theme={{
-            calendarBackground: "#ffffff",
+            calendarBackground: "transparent",
             textDayFontSize: 14,
             textMonthFontSize: 14,
             textMonthFontWeight: "bold",
             todayTextColor: "#ff0000",
             selectedDayBackgroundColor: "#6366f1",
             selectedDayTextColor: "#ffffff",
+            textDayHeaderFontSize: 12,
+
+            //  calendarBackground: "transparent",
+
+            //  DAY NAMES (Mon, Tue, ...)
+            textSectionTitleColor: "#2563EB",
+
+            //  MONTH TITLE (May 2026)
+            monthTextColor: "#1E293B",
+
+            // textMonthFontSize: 16,
+            // textMonthFontWeight: "bold",
+
+            //  DAYS (1,2,3...)
+            dayTextColor: "#334155",
+
+            //  TODAY
+            // todayTextColor: "#EF4444",
+
+            //  SELECTED DAY
+            // selectedDayBackgroundColor: "#6366f1",
+            // selectedDayTextColor: "#ffffff",
+
+            //  Disabled days (prev/next month)
+            textDisabledColor: "#cbd5e1",
           }}
         />
 
@@ -275,10 +328,35 @@ export default function CalendarScreen() {
       </View>
     </SafeAreaView>
   );
+
+  if (!theme.backgroundImage) {
+    return (
+      <View style={{ flex: 1, backgroundColor: theme.background }}>
+        {content}
+      </View>
+    );
+  }
+
+  return (
+    <ImageBackground
+      style={{ flex: 1 }}
+      source={theme.backgroundImage}
+      resizeMode={theme.category === "texture" ? "repeat" : "cover"}
+    >
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: "transparent",
+        }}
+      >
+        {content}
+      </View>
+    </ImageBackground>
+  );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#f8fafc" },
+  container: { flex: 1 }, //backgroundColor: "#f8fafc"
   taskContainer: { flex: 1, padding: 16 },
   heading: {
     fontSize: 16,
