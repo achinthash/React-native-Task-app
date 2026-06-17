@@ -15,15 +15,15 @@ import React from "react";
 
 export default function Settings() {
   const { theme } = useTheme();
-  const sectionTextStyle = [styles.sectionText, { color: theme.mutedText }];
+  const sectionTextStyle = [styles.sectionText, { color: theme.textPrimary }];
   const cardStyle = [styles.card, { backgroundColor: theme.surface }];
   const iconBoxStyle = [
     styles.iconBox,
-    { backgroundColor: theme.primarySoft, borderColor: theme.border },
+    { backgroundColor: theme.primaryContainer, borderColor: theme.border },
   ];
-  const itemTextStyle = [styles.itemText, { color: theme.text }];
-  const iconColor = theme.primary;
-  const chevronColor = theme.mutedText;
+  const itemTextStyle = [styles.itemText, { color: theme.textMuted }];
+  const iconColor = theme.accent;
+  const chevronColor = theme.textMuted;
 
   const content = (
     <ScrollView
@@ -157,23 +157,23 @@ export default function Settings() {
 
   return (
     <ImageBackground
-      resizeMode={theme.category === "texture" ? "repeat" : "cover"}
-      style={{ flex: 1 }}
+      resizeMode="cover"
+      style={styles.container}
       source={theme.backgroundImage}
     >
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: theme.surfaceSecondary ?? "transparent",
-        }}
-      >
-        {content}
-      </View>
+      <View style={styles.overlay}>{content}</View>
     </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.15)",
+  },
   sectionText: {
     fontSize: 16,
     margin: 16,

@@ -1,3 +1,7 @@
+import { useTheme } from "@/context/ThemeContext";
+import { getAllCategories } from "@/database/tasksService";
+import { Ionicons } from "@expo/vector-icons";
+import React, { useEffect, useState } from "react";
 import {
   Modal,
   Pressable,
@@ -7,10 +11,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
-import { getAllCategories } from "@/database/tasksService";
-import { Ionicons } from "@expo/vector-icons";
-import React, { useEffect, useState } from "react";
 import AddCategoryScreen from "./AddCategoryScreen";
 
 type Category = {
@@ -25,6 +25,7 @@ export default function CategorySelect({
   selectedCategory,
   setSelectedCategory,
 }: any) {
+  const { theme } = useTheme();
   const [cateories, setCategories] = useState<Category[]>([]);
   const [isNewCategoryModalVisible, setIsNewCategoryModalVisible] =
     useState(false);
@@ -71,33 +72,46 @@ export default function CategorySelect({
         </Pressable>
       </Modal>
 
-      <Text className="font-bold text-center mb-4 text-xl">
+      <Text
+        className="font-bold text-center mb-4 text-xl"
+        style={{ color: theme.textPrimary }}
+      >
         Select Category
       </Text>
 
       <ScrollView showsVerticalScrollIndicator={false}>
         <View style={styles.grid} className="mb-4">
           <TouchableOpacity
-            style={styles.card}
+            style={[styles.card, { borderColor: theme.border }]}
             onPress={() => {
               setIsNewCategoryModalVisible(true);
             }}
           >
-            <Ionicons name="add" size={20} color="#000" />
-            <Text className="ml-2 font-semibold text-[#374151]">
+            <Ionicons name="add" size={20} color={theme.textMuted} />
+            <Text
+              className="ml-2 font-semibold "
+              style={{ color: theme.textMuted }}
+            >
               New Category
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.card}
+            style={[styles.card, { borderColor: theme.border }]}
             onPress={() => {
               setSelectedCategory(null);
               onDone();
             }}
           >
-            <Ionicons name="close-circle-outline" size={20} color="#6b7280" />
-            <Text className="ml-2 font-semibold text-[#374151]">
+            <Ionicons
+              name="close-circle-outline"
+              size={20}
+              color={theme.textMuted}
+            />
+            <Text
+              className="ml-2 font-semibold "
+              style={{ color: theme.textMuted }}
+            >
               No Category
             </Text>
           </TouchableOpacity>
@@ -116,6 +130,8 @@ export default function CategorySelect({
                 }}
                 style={[
                   styles.card,
+
+                  { borderColor: theme.border },
                   isSelected && {
                     borderColor: item.color,
                     backgroundColor: item.color + "20",
@@ -126,7 +142,17 @@ export default function CategorySelect({
                   <Ionicons name={item.icon as any} size={18} color="#fff" />
                 </View>
 
-                <Text className="text-base font-medium">{item.name}</Text>
+                <Text
+                  className="text-base font-medium"
+                  style={[
+                    isSelected && {
+                      color: item.color,
+                    },
+                    { color: theme.textMuted },
+                  ]}
+                >
+                  {item.name}
+                </Text>
               </TouchableOpacity>
             );
           })}
@@ -161,7 +187,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#e5e7eb",
+
     flexDirection: "row",
     alignItems: "center",
   },

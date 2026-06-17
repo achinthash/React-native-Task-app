@@ -130,11 +130,8 @@ export default function NewTasks() {
         }
       } else {
         Alert.alert("Error", response.message);
-
-        console.log(response);
       }
     } catch (err) {
-      console.log(err);
       Alert.alert("Error", "Something went wrong");
     }
   };
@@ -228,7 +225,7 @@ export default function NewTasks() {
               <View className="flex-row justify-between items-center mb-2">
                 <Text
                   style={{
-                    color: theme.text,
+                    color: theme.textPrimary,
                     fontSize: 18,
                     fontWeight: "bold",
                   }}
@@ -246,15 +243,18 @@ export default function NewTasks() {
                 value={note}
                 onChangeText={setNote}
                 placeholder="Enter additional details..."
+                placeholderTextColor={theme.textMuted}
                 multiline
                 textAlignVertical="top"
                 autoFocus={true}
+                className="border  rounded-md p-2"
                 style={{
                   minHeight: 220,
                   maxHeight: 220,
-                  backgroundColor: theme.surfaceSecondary,
-                  color: theme.text,
+                  backgroundColor: theme.surface,
+                  color: theme.textMuted,
                   fontSize: 16,
+                  borderColor: theme.border,
                 }}
               />
             </View>
@@ -281,7 +281,7 @@ export default function NewTasks() {
           >
             <Text
               style={{
-                color: theme.text,
+                color: theme.textPrimary,
                 fontWeight: "bold",
                 textAlign: "center",
                 marginBottom: 16,
@@ -295,10 +295,10 @@ export default function NewTasks() {
               // Dynamic priority coloring based on theme if possible, or standard status colors
               const getPriorityColor = () => {
                 if (value.label.toLowerCase().includes("high"))
-                  return theme.danger;
+                  return theme.textMuted;
                 if (value.label.toLowerCase().includes("med"))
-                  return theme.warning;
-                return theme.success;
+                  return theme.textMuted;
+                return theme.textMuted;
               };
 
               return (
@@ -341,7 +341,7 @@ export default function NewTasks() {
         <BottomSheetTextInput
           autoFocus={true}
           placeholder="What's on your mind?"
-          placeholderTextColor={theme.text || "#666666"}
+          placeholderTextColor={theme.textMuted || "#666666"}
           multiline={true}
           numberOfLines={5}
           value={title}
@@ -352,8 +352,8 @@ export default function NewTasks() {
             maxHeight: 70,
             fontSize: 16,
             textAlignVertical: "top",
-            backgroundColor: theme.surfaceSecondary,
-            color: theme.text,
+            backgroundColor: theme.surface,
+            color: theme.textPrimary,
             borderWidth: 1,
             borderColor: theme.border,
           }}
@@ -366,12 +366,12 @@ export default function NewTasks() {
               onPress={() => setCategoryModalVisible(true)}
               className="px-3 py-2 rounded-md "
               style={{
-                backgroundColor: theme.primarySoft,
+                backgroundColor: theme.primaryContainer,
               }}
             >
               <Text
                 style={{
-                  color: theme.primaryDark,
+                  color: theme.textMuted,
                   fontWeight: "500",
                   fontSize: 14,
                 }}
@@ -383,20 +383,20 @@ export default function NewTasks() {
             <Pressable
               onPress={() => setDateModalVisible(true)}
               className="p-2 rounded-xl"
-              style={{ backgroundColor: theme.primarySoft }}
+              style={{ backgroundColor: theme.primaryContainer }}
             >
-              <Ionicons name="calendar" size={18} color={theme.primaryDark} />
+              <Ionicons name="calendar" size={18} color={theme.textMuted} />
             </Pressable>
 
             <Pressable
               onPress={() => setNoteModalVisible(true)}
               className="p-2 rounded-md "
-              style={{ backgroundColor: theme.primarySoft }}
+              style={{ backgroundColor: theme.primaryContainer }}
             >
               <Ionicons
                 name="document-text-outline"
                 size={18}
-                color={theme.primaryDark}
+                color={theme.textMuted}
               />
             </Pressable>
 
@@ -404,11 +404,11 @@ export default function NewTasks() {
             <Pressable
               onPress={() => setPriorityModalVisible(true)}
               className="px-3 py-2 rounded-md  flex-row items-center"
-              style={{ backgroundColor: theme.primarySoft }}
+              style={{ backgroundColor: theme.primaryContainer }}
             >
               <Text
                 style={{
-                  color: theme.primaryDark,
+                  color: theme.textMuted,
                   fontWeight: "500",
                   fontSize: 14,
                 }}

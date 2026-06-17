@@ -176,10 +176,11 @@ export default function CalendarScreen() {
   const content = (
     <SafeAreaView style={styles.container} edges={["top"]}>
       {/*Floating new task button  */}
-      <View className="z-10 right-6  bottom-6 absolute">
+      <View className="absolute bottom-6 right-6 z-10">
         <Pressable
-          className="rounded-full bg-blue-500 p-5"
+          className="rounded-full p-5"
           onPress={handlePresentModalPress}
+          style={{ backgroundColor: theme.primary }}
         >
           <AntDesign name="plus" size={24} color="white" />
         </Pressable>
@@ -194,7 +195,7 @@ export default function CalendarScreen() {
         backdropComponent={renderBackdrop}
         // ↓ remove keyboardBehavior entirely — we handle it manually above
         keyboardBlurBehavior="restore"
-        backgroundStyle={{ backgroundColor: "#ffffff" }}
+        backgroundStyle={{ backgroundColor: theme.surface }}
         enablePanDownToClose={false} // ← disable swipe to close
         enableHandlePanningGesture={false} // ← disable dragging the handle
         enableContentPanningGesture={false} // ← disable dragging the content
@@ -223,43 +224,41 @@ export default function CalendarScreen() {
           }}
           markedDates={markedDates}
           theme={{
+            // Main Container Base
             calendarBackground: "transparent",
+
+            // Typography Sizing Configuration
             textDayFontSize: 14,
-            textMonthFontSize: 14,
+            textMonthFontSize: 16,
             textMonthFontWeight: "bold",
-            todayTextColor: "#ff0000",
-            selectedDayBackgroundColor: "#6366f1",
-            selectedDayTextColor: "#ffffff",
             textDayHeaderFontSize: 12,
 
-            //  calendarBackground: "transparent",
+            // Month Header Name Text (e.g., June 2026)
+            monthTextColor: theme.textPrimary,
 
-            //  DAY NAMES (Mon, Tue, ...)
-            textSectionTitleColor: "#2563EB",
+            // Day Letters Layout (e.g., Mon, Tue, Wed...)
+            textSectionTitleColor: theme.textMuted,
 
-            //  MONTH TITLE (May 2026)
-            monthTextColor: "#1E293B",
+            // Normal Grid Calendar Numbers
+            dayTextColor: theme.textPrimary,
 
-            // textMonthFontSize: 16,
-            // textMonthFontWeight: "bold",
+            // Current Calendar Day Marker
+            todayTextColor: theme.primary,
+            todayButtonFontWeight: "bold",
 
-            //  DAYS (1,2,3...)
-            dayTextColor: "#334155",
+            // User Selection Active Circle Indicators
+            selectedDayBackgroundColor: theme.primary,
+            selectedDayTextColor: theme.textOnPrimary,
 
-            //  TODAY
-            // todayTextColor: "#EF4444",
-
-            //  SELECTED DAY
-            // selectedDayBackgroundColor: "#6366f1",
-            // selectedDayTextColor: "#ffffff",
-
-            //  Disabled days (prev/next month)
-            textDisabledColor: "#cbd5e1",
+            // Disabled Outer Padding Dates (Previous/Next Month Filler Days)
+            textDisabledColor: theme.textMuted,
           }}
         />
 
         <View style={styles.taskContainer}>
-          <Text style={styles.heading}>{selectedDate || "Select a date"}</Text>
+          <Text style={[styles.heading, { color: theme.textPrimary }]}>
+            {selectedDate || "Select a date"}
+          </Text>
 
           {selectedTasks.length === 0 ? (
             <Text style={styles.empty}>No tasks</Text>
@@ -274,20 +273,25 @@ export default function CalendarScreen() {
                     item.status === "completed"
                       ? styles.completedCard
                       : styles.card,
+                    { backgroundColor: theme.primaryContainer },
+
                     { borderLeftColor: item.category_color || "#6366f1" },
                   ]}
                 >
-                  <View style={styles.cardHeader}>
+                  <View style={[styles.cardHeader]}>
                     <Text
                       style={[
                         styles.taskTitle,
                         item.status === "completed" && styles.completedText,
+                        { color: theme.textPrimary },
                       ]}
                     >
                       {item.title}
                     </Text>
 
-                    <Text style={styles.taskTime}>{item.time}</Text>
+                    <Text style={[styles.taskTime, { color: theme.textMuted }]}>
+                      {item.time}
+                    </Text>
                   </View>
                   {item.note ? (
                     <Text
@@ -295,6 +299,8 @@ export default function CalendarScreen() {
                         item.status === "completed"
                           ? styles.completedNote
                           : styles.note,
+                        ,
+                        { color: theme.textMuted },
                       ]}
                     >
                       {item.note ? `${item.note.slice(0, 20)}...` : " "}
@@ -341,7 +347,7 @@ export default function CalendarScreen() {
     <ImageBackground
       style={{ flex: 1 }}
       source={theme.backgroundImage}
-      resizeMode={theme.category === "texture" ? "repeat" : "cover"}
+      resizeMode="cover"
     >
       <View
         style={{
@@ -362,7 +368,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     marginBottom: 10,
-    color: "#1e293b",
   },
   empty: { color: "#94a3b8", textAlign: "center", marginTop: 20 },
   card: {
@@ -396,7 +401,7 @@ const styles = StyleSheet.create({
   },
   taskTitle: { fontSize: 15, fontWeight: "600", color: "#334155" },
   completedText: { textDecorationLine: "line-through", color: "#cbd5e1" },
-  taskTime: { fontSize: 12, color: "#64748b" },
+  taskTime: { fontSize: 12 },
   note: { fontSize: 13, color: "#64748b", marginBottom: 6 },
   completedNote: {
     fontSize: 13,

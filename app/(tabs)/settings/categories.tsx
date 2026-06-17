@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import {
   Alert,
   FlatList,
+  ImageBackground,
   Modal,
   Text,
   TouchableOpacity,
@@ -11,6 +12,7 @@ import {
 
 import AddCategoryScreen from "@/app/tasks/AddCategoryScreen";
 import EditCategory from "@/app/tasks/EditCategory";
+import { useTheme } from "@/context/ThemeContext";
 import { deleteCategory, getAllCategories } from "@/database/tasksService";
 import { ActivityIndicator } from "react-native";
 
@@ -22,6 +24,7 @@ type Category = {
 };
 
 export default function CategoriesScreen() {
+  const { theme } = useTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [isNewCategoryModalVisible, setIsNewCategoryModalVisible] =
     useState(false);
@@ -91,19 +94,21 @@ export default function CategoriesScreen() {
     );
   }
 
-  return (
-    <View style={{ flex: 1, backgroundColor: "#fff", padding: 16 }}>
+  const content = (
+    <View style={{ flex: 1, padding: 16 }}>
       {/* HEADER BUTTON */}
       <TouchableOpacity
         onPress={() => setIsNewCategoryModalVisible(true)}
         style={{
-          backgroundColor: "teal",
+          backgroundColor: theme.primaryContainer,
           padding: 12,
           borderRadius: 10,
           marginBottom: 16,
         }}
       >
-        <Text style={{ color: "#fff", fontWeight: "600" }}>+ Add Category</Text>
+        <Text style={{ color: theme.textPrimary, fontWeight: "600" }}>
+          + Add Category
+        </Text>
       </TouchableOpacity>
 
       {/* new category modal*/}
@@ -114,7 +119,10 @@ export default function CategoriesScreen() {
         onRequestClose={() => setIsNewCategoryModalVisible(false)}
       >
         <View className="flex-1 justify-center items-center bg-black/50">
-          <View className="bg-white m-5 p-4 rounded-3xl items-center shadow-xl w-[90%] max-h-[90%]">
+          <View
+            style={{ backgroundColor: theme.surface }}
+            className=" m-5 p-4 rounded-3xl items-center shadow-xl w-[90%] max-h-[90%]"
+          >
             <AddCategoryScreen
               onCancel={() => setIsNewCategoryModalVisible(false)}
               onDone={() => {
@@ -134,7 +142,10 @@ export default function CategoriesScreen() {
         onRequestClose={() => setIsEditModalVisible(false)}
       >
         <View className="flex-1 justify-center items-center bg-black/50">
-          <View className="bg-white m-5 p-4 rounded-3xl items-center shadow-xl w-[90%] max-h-[90%]">
+          <View
+            style={{ backgroundColor: theme.surface }}
+            className=" m-5 p-4 rounded-3xl items-center shadow-xl w-[90%] max-h-[90%]"
+          >
             {selectedCategory && (
               <EditCategory
                 category={selectedCategory}
@@ -167,7 +178,7 @@ export default function CategoriesScreen() {
               justifyContent: "space-between",
               paddingVertical: 14,
               borderBottomWidth: 1,
-              borderBottomColor: "#F3F4F6",
+              borderBottomColor: theme.border,
             }}
           >
             {/* LEFT */}
@@ -186,7 +197,9 @@ export default function CategoriesScreen() {
                 <Ionicons name={item.icon as any} size={16} color="#fff" />
               </View>
 
-              <Text style={{ fontSize: 15 }}>{item.name}</Text>
+              <Text style={{ fontSize: 15, color: theme.textMuted }}>
+                {item.name}
+              </Text>
             </View>
 
             {/* RIGHT ACTIONS */}
@@ -197,16 +210,45 @@ export default function CategoriesScreen() {
                   setIsEditModalVisible(true);
                 }}
               >
-                <Ionicons name="create-outline" size={20} color="#6B7280" />
+                <Ionicons
+                  name="create-outline"
+                  size={20}
+                  color={theme.textMuted}
+                />
               </TouchableOpacity>
 
               <TouchableOpacity onPress={() => handleDelete(item.id)}>
-                <Ionicons name="trash-outline" size={20} color="#EF4444" />
+                <Ionicons name="trash-outline" size={20} color={theme.error} />
               </TouchableOpacity>
             </View>
           </View>
         )}
       />
     </View>
+  );
+
+  if (!theme.backgroundImage) {
+    return (
+      <View style={{ flex: 1, backgroundColor: theme.background }}>
+        {content}
+      </View>
+    );
+  }
+
+  return (
+    <ImageBackground
+      style={{ flex: 1 }}
+      source={theme.backgroundImage}
+      resizeMode={"cover"}
+    >
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: "transparent",
+        }}
+      >
+        {content}
+      </View>
+    </ImageBackground>
   );
 }

@@ -112,7 +112,7 @@ export default function TasksList() {
   const myCatgoies: Category[] = [
     { color: theme.primary, icon: "school", id: "all", name: "All" },
     {
-      color: theme.mutedText,
+      color: theme.textMuted,
       icon: "close-circle-outline",
       id: "no-category",
       name: "No Category",
@@ -177,18 +177,18 @@ export default function TasksList() {
   const SECTION_CONFIG = {
     Previous: {
       icon: "checkmark-done-outline",
-      color: theme.primary,
-      bg: theme.primarySoft,
+      color: theme.backgroundImage ? theme.textPrimary : theme.textPrimary,
+      bg: theme.backgroundImage ? "transparent" : theme.surface,
     },
     Today: {
       icon: "today-outline",
-      color: theme.primary,
-      bg: theme.primarySoft,
+      color: theme.backgroundImage ? theme.textPrimary : theme.textPrimary,
+      bg: theme.backgroundImage ? "transparent" : theme.surface,
     },
     Future: {
       icon: "time-outline",
-      color: theme.primary,
-      bg: theme.primarySoft,
+      color: theme.backgroundImage ? theme.textPrimary : theme.textPrimary,
+      bg: theme.backgroundImage ? "transparent" : theme.surface,
     },
   } as const;
 
@@ -225,7 +225,7 @@ export default function TasksList() {
           {/* Optional: Add a subtle icon background */}
           <View
             style={{
-              backgroundColor: theme.surface,
+              backgroundColor: theme.primaryContainer,
               padding: 6,
               borderRadius: 8,
               marginRight: 12,
@@ -296,10 +296,11 @@ export default function TasksList() {
         style={[
           styles.taskCard,
           {
-            backgroundColor: theme.surface,
+            backgroundColor: theme.primaryContainer,
             borderColor: theme.border,
             borderLeftWidth: 4,
             borderLeftColor: priority.color,
+            marginTop: 4,
           },
         ]}
         activeOpacity={0.8}
@@ -312,8 +313,8 @@ export default function TasksList() {
               {
                 backgroundColor: isCompleted
                   ? `${theme.success}18`
-                  : theme.primarySoft,
-                borderColor: isCompleted ? theme.success : theme.border,
+                  : theme.primaryContainer,
+                borderColor: isCompleted ? theme.success : `${theme.primary}`,
               },
             ]}
           >
@@ -328,15 +329,22 @@ export default function TasksList() {
             <Text
               style={[
                 styles.taskTitle,
-                { color: theme.text },
-                isCompleted && { color: theme.mutedText },
+                { color: theme.textPrimary },
+                isCompleted && { color: theme.textMuted },
                 isCompleted && styles.completedText,
               ]}
             >
               {item.title}
             </Text>
 
-            <Text style={[styles.noteText, { color: theme.mutedText }]}>
+            <Text
+              style={[
+                styles.noteText,
+                { color: theme.textMuted },
+                isCompleted && { color: theme.textMuted },
+                isCompleted && styles.completedText,
+              ]}
+            >
               {item.note ? `${item.note.slice(0, 20)}...` : " "}
             </Text>
             {/* note goes here   */}
@@ -376,9 +384,9 @@ export default function TasksList() {
                   <Ionicons
                     name="time-outline"
                     size={14}
-                    color={theme.mutedText}
+                    color={theme.textPrimary}
                   />
-                  <Text style={[styles.dateText, { color: theme.mutedText }]}>
+                  <Text style={[styles.dateText, { color: theme.textPrimary }]}>
                     {item.scheduled_date}
                     {item.time ? ` : ${item.time}` : ""}
                   </Text>

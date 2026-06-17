@@ -5,9 +5,10 @@ import {
   updateTaskStatus,
 } from "@/database/tasksService";
 
+import { useTheme } from "@/context/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -20,7 +21,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Button, Menu, PaperProvider } from "react-native-paper";
+import { Button, MD3LightTheme, Menu, PaperProvider } from "react-native-paper";
 import { TimePickerModal } from "react-native-paper-dates";
 
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -55,6 +56,28 @@ export default function TaskDetailsScreen() {
   const [task, setTask] = useState<Task | null>(null);
   const [initialTask, setInitialTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(true);
+  const { theme } = useTheme();
+
+  const paperTheme = useMemo(
+    () => ({
+      ...MD3LightTheme,
+      colors: {
+        ...MD3LightTheme.colors,
+        primary: theme.primary,
+        onPrimary: theme.textOnPrimary,
+        primaryContainer: theme.primaryContainer,
+        onPrimaryContainer: theme.textOnPrimary,
+        background: theme.background,
+        onBackground: theme.textPrimary,
+        surface: theme.surface,
+        onSurface: theme.textPrimary,
+        surfaceVariant: theme.primaryContainer,
+        onSurfaceVariant: theme.textSecondary,
+        outline: theme.border,
+      },
+    }),
+    [theme],
+  );
 
   const [visibleMenu, setVisibleMenu] = useState(false);
   const [visiblePriority, setVisiblePriority] = useState(false);
@@ -80,7 +103,6 @@ export default function TaskDetailsScreen() {
         const response = await getTaskById(Number(id));
         setTask(response);
         setInitialTask(response);
-        console.log(response);
 
         if (response) {
           setTitle(response.title);
@@ -247,112 +269,141 @@ export default function TaskDetailsScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={["top", "left", "right"]}>
-      {/* category select modal  */}
-      <Modal
-        visible={categoryModalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setCategoryModalVisible(false)}
+    <PaperProvider theme={paperTheme}>
+      <SafeAreaView
+        className="flex-1 "
+        style={{ backgroundColor: theme.background }}
+        edges={["top", "left", "right"]}
       >
-        {/* OUTSIDE */}
-        <Pressable
-          style={styles.overlay}
-          onPress={() => setCategoryModalVisible(false)}
+        {/* category select modal  */}
+        <Modal
+          visible={categoryModalVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setCategoryModalVisible(false)}
         >
-          {/* INSIDE (prevent close) */}
+          {/* OUTSIDE */}
           <Pressable
-            onPress={(e) => e.stopPropagation()}
-            style={styles.modalContainer}
+            style={styles.overlay}
+            onPress={() => setCategoryModalVisible(false)}
           >
-            <CategorySelect
-              setSelectedCategory={setSelectedCategory}
-              selectedCategory={selectedCategory}
-              onDone={() => setCategoryModalVisible(false)}
-            />
+            {/* INSIDE (prevent close) */}
+            <Pressable
+              onPress={(e) => e.stopPropagation()}
+              style={[
+                styles.modalContainer,
+                { backgroundColor: theme.surface },
+              ]}
+            >
+              <CategorySelect
+                setSelectedCategory={setSelectedCategory}
+                selectedCategory={selectedCategory}
+                onDone={() => setCategoryModalVisible(false)}
+              />
+            </Pressable>
           </Pressable>
-        </Pressable>
-      </Modal>
+        </Modal>
 
-      {/* Date select modal*/}
-      <Modal
-        visible={isDateModalVisible}
-        transparent={true}
-        animationType="fade"
-      >
-        <View style={styles.overlay}>
-          <View style={{}} className="w-[90%] bg-[#fff] rounded-2xl p-4">
-            <DateSelect
-              onCancel={() => setDateModalVisible(false)}
-              selectedDate={selectedDate}
-              selectedTime={selectedTime}
-              onConfirm={(date, time) => {
-                setSelectedDate(date);
-                setSelectedTime(time);
-                setDateModalVisible(false);
-              }}
-            />
-          </View>
-        </View>
-      </Modal>
-
-      {/* time select modal*/}
-      <TimePickerModal
-        visible={isTimeModalVisible}
-        onDismiss={onDismiss}
-        onConfirm={handleTimeConfirm}
-        hours={12}
-        minutes={30}
-        label="Select time"
-        uppercase={false}
-        cancelLabel="Cancel"
-        confirmLabel="Ok"
-        animationType="fade"
-      />
-
-      {/* note select modal  */}
-      <Modal
-        visible={noteModalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setNoteModalVisible(false)}
-      >
-        {/* OUTSIDE */}
-        <Pressable
-          style={styles.overlay}
-          onPress={() => setNoteModalVisible(false)}
+        {/* Date select modal*/}
+        <Modal
+          visible={isDateModalVisible}
+          transparent={true}
+          animationType="fade"
         >
-          {/* INSIDE (prevent close) */}
-          <Pressable
-            onPress={(e) => e.stopPropagation()}
-            style={styles.modalContainer}
-          >
-            <View className="flex-col">
-              <View className="flex-row justify-between items-center mb-2">
-                <Text className="text-lg font-bold text-gray-700">
-                  Add Note
-                </Text>
-                <Pressable onPress={() => setNoteModalVisible(false)}>
-                  <Text className="text-blue-500 font-semibold">Done</Text>
-                </Pressable>
-              </View>
-
-              <TextInput
-                value={note}
-                onChangeText={setNote}
-                placeholder="Enter additional details..."
-                multiline
-                textAlignVertical="top"
-                autoFocus={true}
-                className="text-base text-gray-800 bg-gray-50 p-4 rounded-xl"
-                style={{ minHeight: 220, maxHeight: 220 }}
+          <View style={styles.overlay}>
+            <View
+              className="w-[90%]  rounded-2xl p-4"
+              style={{ backgroundColor: theme.surface }}
+            >
+              <DateSelect
+                onCancel={() => setDateModalVisible(false)}
+                selectedDate={selectedDate}
+                selectedTime={selectedTime}
+                onConfirm={(date, time) => {
+                  setSelectedDate(date);
+                  setSelectedTime(time);
+                  setDateModalVisible(false);
+                }}
               />
             </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
+          </View>
+        </Modal>
 
-      <PaperProvider>
+        {/* time select modal*/}
+
+        <TimePickerModal
+          visible={isTimeModalVisible}
+          onDismiss={onDismiss}
+          onConfirm={handleTimeConfirm}
+          hours={12}
+          minutes={30}
+          label="Select time"
+          uppercase={false}
+          cancelLabel="Cancel"
+          confirmLabel="Ok"
+          animationType="fade"
+        />
+
+        {/* note select modal  */}
+        <Modal
+          visible={noteModalVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setNoteModalVisible(false)}
+        >
+          {/* OUTSIDE */}
+          <Pressable
+            style={styles.overlay}
+            onPress={() => setNoteModalVisible(false)}
+          >
+            {/* INSIDE (prevent close) */}
+            <Pressable
+              onPress={(e) => e.stopPropagation()}
+              style={[
+                styles.modalContainer,
+                { backgroundColor: theme.surface },
+              ]}
+            >
+              <View
+                className="flex-col "
+                style={{
+                  backgroundColor: theme.surface,
+                  borderColor: theme.border,
+                }}
+              >
+                <View className="flex-row justify-between items-center mb-2 ">
+                  <Text
+                    className="text-lg font-bold "
+                    style={{ color: theme.textPrimary }}
+                  >
+                    Add Note
+                  </Text>
+                  <Pressable onPress={() => setNoteModalVisible(false)}>
+                    <Text className="text-blue-500 font-semibold">Done</Text>
+                  </Pressable>
+                </View>
+
+                <TextInput
+                  value={note}
+                  onChangeText={setNote}
+                  placeholder="Enter additional details..."
+                  placeholderTextColor={theme.textMuted}
+                  multiline
+                  textAlignVertical="top"
+                  autoFocus={true}
+                  className="text-base text-gray-800  p-4 rounded-xl border  "
+                  style={{
+                    minHeight: 220,
+                    maxHeight: 220,
+                    borderColor: theme.border,
+                    color: theme.textMuted,
+                  }}
+                />
+              </View>
+            </Pressable>
+          </Pressable>
+        </Modal>
+
         {/* Header */}
         <View className="flex-row items-center justify-between px-4 py-4">
           <TouchableOpacity onPress={() => router.back()}>
@@ -363,7 +414,7 @@ export default function TaskDetailsScreen() {
             visible={visibleMenu}
             onDismiss={() => setVisibleMenu(false)}
             contentStyle={{
-              backgroundColor: "white",
+              backgroundColor: theme.surface,
               borderRadius: 8,
             }}
             anchor={
@@ -376,24 +427,24 @@ export default function TaskDetailsScreen() {
               onPress={() => {
                 markStatus(Number(id));
               }}
-              titleStyle={{ color: "black" }}
+              titleStyle={{ color: theme.textPrimary }}
               title={status === "pending" ? "Mark as Done" : "Mark as Undone"}
             />
             <Menu.Item
               onPress={() => {}}
-              titleStyle={{ color: "black" }}
+              titleStyle={{ color: theme.textPrimary }}
               title="Print"
             />
             <Menu.Item
               onPress={() => {}}
-              titleStyle={{ color: "black" }}
+              titleStyle={{ color: theme.textPrimary }}
               title="Share"
             />
             <Menu.Item
               onPress={() => {
                 handleDelete(Number(id));
               }}
-              titleStyle={{ color: "black" }}
+              titleStyle={{ color: theme.error }}
               title="Delete"
             />
           </Menu>
@@ -403,13 +454,15 @@ export default function TaskDetailsScreen() {
           <TextInput
             value={title}
             onChangeText={setTitle}
-            className="text-3xl font-semibold text-gray-800 mb-8"
+            className="text-3xl font-semibold  mb-8"
+            style={{ color: theme.textPrimary }}
           />
 
           <View className="mb-10">
             {/* Priority */}
             <TouchableOpacity
-              className="flex-row items-center justify-between py-4 border-b border-gray-100"
+              className="flex-row items-center justify-between py-4 border-b "
+              style={{ borderColor: theme.border }}
               onPress={() => setVisiblePriority(true)} // Open menu when row is clicked
             >
               <View className="flex-row items-center">
@@ -417,34 +470,45 @@ export default function TaskDetailsScreen() {
                   <Ionicons
                     name="alert-circle-outline"
                     size={22}
-                    color="#999"
+                    color={theme.textPrimary}
                   />
                 </View>
                 <View className="flex-row items-center">
-                  <Text className="text-gray-500 text-base">Priority</Text>
+                  <Text
+                    className=" text-base"
+                    style={{ color: theme.textPrimary }}
+                  >
+                    Priority
+                  </Text>
                 </View>
               </View>
               <View className={` py-1 rounded-md`}>
                 <Menu
                   visible={visiblePriority}
                   onDismiss={() => setVisiblePriority(false)}
-                  contentStyle={{ backgroundColor: "white", borderRadius: 8 }}
+                  contentStyle={{
+                    backgroundColor: theme.surface,
+                    borderRadius: 8,
+                  }}
                   anchor={
-                    <View className="px-3 py-2 rounded-md bg-gray-100 flex-row items-center">
-                      <Text className={"text-black"}>
+                    <View
+                      className="px-3 py-2 rounded-md  flex-row items-center"
+                      style={{ backgroundColor: theme.primaryContainer }}
+                    >
+                      <Text style={{ color: theme.textMuted }}>
                         {PRIORITY_MAP[priority]?.label}
                       </Text>
                       <Ionicons
                         name="chevron-down"
                         size={14}
-                        color="#999"
+                        color={theme.textPrimary}
                         style={{ marginLeft: 4 }}
                       />
                     </View>
                   }
                 >
                   <Menu.Item
-                    titleStyle={{ color: "black" }}
+                    titleStyle={{ color: theme.textPrimary }}
                     onPress={() => {
                       setPriority(3);
                       setVisiblePriority(false);
@@ -452,7 +516,7 @@ export default function TaskDetailsScreen() {
                     title="High"
                   />
                   <Menu.Item
-                    titleStyle={{ color: "black" }}
+                    titleStyle={{ color: theme.textPrimary }}
                     onPress={() => {
                       setPriority(2);
                       setVisiblePriority(false);
@@ -460,7 +524,7 @@ export default function TaskDetailsScreen() {
                     title="Medium"
                   />
                   <Menu.Item
-                    titleStyle={{ color: "black" }}
+                    titleStyle={{ color: theme.textPrimary }}
                     onPress={() => {
                       setPriority(1);
                       setVisiblePriority(false);
@@ -469,7 +533,7 @@ export default function TaskDetailsScreen() {
                   />
 
                   <Menu.Item
-                    titleStyle={{ color: "black" }}
+                    titleStyle={{ color: theme.textPrimary }}
                     onPress={() => {
                       setPriority(0);
                       setVisiblePriority(false);
@@ -481,83 +545,131 @@ export default function TaskDetailsScreen() {
             </TouchableOpacity>
 
             {/* Category  */}
-            <TouchableOpacity className="flex-row items-center justify-between py-4 border-b border-gray-100">
+            <TouchableOpacity
+              className="flex-row items-center justify-between py-4 border-b "
+              style={{ borderColor: theme.border }}
+            >
               <View className="flex-row items-center">
                 <View className="w-10 items-center">
-                  <Ionicons name="pricetag-outline" size={22} color="#999" />
+                  <Ionicons
+                    name="pricetag-outline"
+                    size={22}
+                    color={theme.textPrimary}
+                  />
                 </View>
                 <View className="flex-row items-center">
-                  <Text className="text-gray-500 text-base">Category</Text>
+                  <Text
+                    className=" text-base"
+                    style={{ color: theme.textPrimary }}
+                  >
+                    Category
+                  </Text>
                 </View>
               </View>
 
               <Pressable
                 onPress={() => setCategoryModalVisible(true)}
-                className="px-3 py-2 rounded-md bg-gray-100"
+                className="px-3 py-2 rounded-md "
+                style={{ backgroundColor: theme.primaryContainer }}
               >
-                <Text> {selectedCategory?.name || "No Category"}</Text>
+                <Text style={{ color: theme.textMuted }}>
+                  {selectedCategory?.name || "No Category"}
+                </Text>
               </Pressable>
             </TouchableOpacity>
 
             {/* Scheduled Date */}
-            <TouchableOpacity className="flex-row items-center justify-between py-4 border-b border-gray-100">
+            <TouchableOpacity
+              className="flex-row items-center justify-between py-4 border-b "
+              style={{ borderColor: theme.border }}
+            >
               <View className="flex-row items-center">
                 <View className="w-10 items-center">
-                  <Ionicons name="calendar-outline" size={22} color="#999" />
+                  <Ionicons
+                    name="calendar-outline"
+                    size={22}
+                    color={theme.textPrimary}
+                  />
                 </View>
                 <View className="flex-row items-center">
-                  <Text className="text-gray-500 text-base">
+                  <Text
+                    className=" text-base"
+                    style={{ color: theme.textPrimary }}
+                  >
                     Scheduled Date
                   </Text>
                 </View>
               </View>
               <Pressable
                 onPress={() => setDateModalVisible(true)}
-                className="px-3 py-2 rounded-md bg-gray-100"
+                className="px-3 py-2 rounded-md "
+                style={{ backgroundColor: theme.primaryContainer }}
               >
-                <Text>{selectedDate}</Text>
+                <Text style={{ color: theme.textMuted }}>{selectedDate}</Text>
               </Pressable>
             </TouchableOpacity>
 
             {/* Time & Reminder */}
-            <TouchableOpacity className="flex-row items-center justify-between py-4 border-b border-gray-100">
+            <TouchableOpacity
+              className="flex-row items-center justify-between py-4 border-b "
+              style={{ borderColor: theme.border }}
+            >
               <View className="flex-row items-center">
                 <View className="w-10 items-center">
-                  <Ionicons name="time-outline" size={22} color="#999" />
+                  <Ionicons
+                    name="time-outline"
+                    size={22}
+                    color={theme.textPrimary}
+                  />
                 </View>
                 <View className="flex-row items-center">
-                  <Text className="text-gray-500 text-base">
+                  <Text
+                    className="text-base"
+                    style={{ color: theme.textPrimary }}
+                  >
                     Time & Reminder
                   </Text>
                 </View>
               </View>
               <Pressable
                 onPress={() => setTimeModalVisible(true)}
-                className="px-3 py-2 rounded-md bg-gray-100"
+                className="px-3 py-2 rounded-md "
+                style={{ backgroundColor: theme.primaryContainer }}
               >
-                <Text>{selectedTime || "add"}</Text>
+                <Text style={{ color: theme.textMuted }}>
+                  {selectedTime || "add"}
+                </Text>
               </Pressable>
             </TouchableOpacity>
 
             {/* Notes */}
-            <TouchableOpacity className="flex-row items-center justify-between py-4 border-b border-gray-100">
+            <TouchableOpacity
+              className="flex-row items-center justify-between py-4 border-b "
+              style={{ borderColor: theme.border }}
+            >
               <View className="flex-row items-center">
                 <View className="w-10 items-center">
                   <Ionicons
                     name="document-text-outline"
                     size={22}
-                    color="#999"
+                    color={theme.textPrimary}
                   />
                 </View>
                 <View className="flex-row items-center">
-                  <Text className="text-gray-500 text-base">Notes</Text>
+                  <Text
+                    className="text-base"
+                    style={{ color: theme.textPrimary }}
+                  >
+                    Notes
+                  </Text>
                 </View>
               </View>
               <Pressable
                 onPress={() => setNoteModalVisible(true)}
-                className="px-3 py-2 rounded-md bg-gray-100"
+                className="px-3 py-2 rounded-md "
+                style={{ backgroundColor: theme.primaryContainer }}
               >
-                <Text>
+                <Text style={{ color: theme.textMuted }}>
                   {note
                     ? note.length > 20
                       ? `${note.slice(0, 20)}...`
@@ -568,23 +680,35 @@ export default function TaskDetailsScreen() {
             </TouchableOpacity>
 
             {/* Attachment */}
-            <TouchableOpacity className="flex-row items-center justify-between py-4 border-b border-gray-100">
+            <TouchableOpacity
+              className="flex-row items-center justify-between py-4 border-b "
+              style={{ borderColor: theme.border }}
+            >
               <View className="flex-row items-center">
                 <View className="w-10 items-center">
-                  <Ionicons name="attach-outline" size={22} color="#999" />
+                  <Ionicons
+                    name="attach-outline"
+                    size={22}
+                    color={theme.textPrimary}
+                  />
                 </View>
                 <View className="flex-row items-center">
-                  <Text className="text-gray-500 text-base">Attachment</Text>
+                  <Text
+                    className=" text-base"
+                    style={{ color: theme.textPrimary }}
+                  >
+                    Attachment
+                  </Text>
                 </View>
               </View>
               <View className={`px-3 py-1 rounded-md `}>
-                <Text className={`text-base `}>add</Text>
+                <Text style={{ color: theme.textMuted }}>add</Text>
               </View>
             </TouchableOpacity>
           </View>
         </ScrollView>
-      </PaperProvider>
-    </SafeAreaView>
+      </SafeAreaView>
+    </PaperProvider>
   );
 }
 
@@ -598,7 +722,6 @@ const styles = StyleSheet.create({
   modalContainer: {
     width: "90%",
     maxHeight: "75%",
-    backgroundColor: "#fff",
     borderRadius: 20,
     padding: 16,
   },
