@@ -341,6 +341,7 @@ export default function NewTasks() {
         <BottomSheetTextInput
           autoFocus={true}
           placeholder="What's on your mind?"
+          placeholderTextColor={theme.text || "#666666"}
           multiline={true}
           numberOfLines={5}
           value={title}

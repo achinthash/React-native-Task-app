@@ -1,16 +1,13 @@
 import * as SQLite from "expo-sqlite";
 
 let db: SQLite.SQLiteDatabase | null = null;
-let initPromise: Promise<SQLite.SQLiteDatabase> | null = null; // ← lock
+let initPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
 export async function initDB(): Promise<SQLite.SQLiteDatabase> {
-  // Already initialized — return immediately
   if (db) return db;
 
-  // Initialization in progress — wait for it instead of starting a new one
   if (initPromise) return initPromise;
 
-  // First call — start initialization and store the promise
   initPromise = (async () => {
     try {
       const instance = await SQLite.openDatabaseAsync("app6.db");
@@ -42,10 +39,10 @@ export async function initDB(): Promise<SQLite.SQLiteDatabase> {
         );
       `);
 
-      db = instance; // ← only set after full setup succeeds
+      db = instance; //
       return db;
     } catch (error) {
-      initPromise = null; // ← reset so it can be retried on failure
+      initPromise = null; //
       console.error("DB Init Error:", error);
       throw error;
     }

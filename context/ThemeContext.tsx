@@ -1,688 +1,266 @@
-import React, { createContext, useContext, useMemo, useState } from "react";
+import React, {
+  createContext,
+  ReactNode,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 
-import type { ImageSourcePropType } from "react-native";
-
-//
-// TYPES
-//
-
-export type ThemeCategory = "color" | "texture" | "scenery";
-
-export type ThemeOption = {
-  name: string;
-  category: ThemeCategory;
+export interface ThemeColors {
   accent: string;
-  isDark?: boolean;
-
-  // Brand
-  primary: string;
-  primarySoft: string;
-  primaryDark: string;
-
-  // Layout
   background: string;
   surface: string;
-  surfaceSecondary: string;
-
-  // Typography
-  text: string;
-  textLight: string;
-  mutedText: string;
-
-  // Borders
   border: string;
-
-  // Status
+  primary: string;
+  primaryContainer: string;
+  textPrimary: string;
+  textSecondary: string;
+  textMuted: string;
+  textOnPrimary: string;
   success: string;
-  warning: string;
-  danger: string;
-  info: string;
+  error: string;
+  backgroundImage: any;
+}
 
-  // UI
-  shadow: string;
-  overlay: string;
-  disabled: string;
-  placeholder: string;
-
-  // Assets
-  backgroundImage?: ImageSourcePropType;
-};
-
-//
-// COLOR THEMES
-//
-
-export const colors = {
-  ocean: {
-    name: "Ocean",
-    category: "color",
-    accent: "#3B82F6",
-    isDark: false,
-
-    primary: "#2563EB",
-    primarySoft: "#DBEAFE",
-    primaryDark: "#1D4ED8",
-
-    background: "#F8FAFC",
-    surface: "#FFFFFF",
-    surfaceSecondary: "#F1F5F9",
-
-    text: "#0F172A",
-    textLight: "#FFFFFF",
-    mutedText: "#64748B",
-
-    border: "#E2E8F0",
-
-    success: "#10B981",
-    warning: "#F59E0B",
-    danger: "#EF4444",
-    info: "#0EA5E9",
-
-    shadow: "rgba(37,99,235,0.15)",
-    overlay: "rgba(15,23,42,0.45)",
-    disabled: "#CBD5E1",
-    placeholder: "#94A3B8",
-  },
-
-  emerald: {
-    name: "Emerald",
-    category: "color",
-    accent: "#10B981",
-    isDark: false,
-
-    primary: "#059669",
-    primarySoft: "#D1FAE5",
-    primaryDark: "#047857",
-
-    background: "#F6FFFB",
-    surface: "#FFFFFF",
-    surfaceSecondary: "#ECFDF5",
-
-    text: "#064E3B",
-    textLight: "#FFFFFF",
-    mutedText: "#6B7280",
-
-    border: "#D1FAE5",
-
-    success: "#10B981",
-    warning: "#FBBF24",
-    danger: "#EF4444",
-    info: "#06B6D4",
-
-    shadow: "rgba(5,150,105,0.15)",
-    overlay: "rgba(6,78,59,0.35)",
-    disabled: "#D1D5DB",
-    placeholder: "#9CA3AF",
-  },
-
-  violet: {
-    name: "Violet",
-    category: "color",
-    accent: "#8B5CF6",
-    isDark: false,
-
-    primary: "#7C3AED",
-    primarySoft: "#EDE9FE",
-    primaryDark: "#6D28D9",
-
-    background: "#FAF8FF",
-    surface: "#FFFFFF",
-    surfaceSecondary: "#F5F3FF",
-
-    text: "#2E1065",
-    textLight: "#FFFFFF",
-    mutedText: "#6B7280",
-
-    border: "#DDD6FE",
-
-    success: "#10B981",
-    warning: "#F59E0B",
-    danger: "#EF4444",
-    info: "#8B5CF6",
-
-    shadow: "rgba(124,58,237,0.16)",
-    overlay: "rgba(46,16,101,0.35)",
-    disabled: "#D1D5DB",
-    placeholder: "#9CA3AF",
-  },
-
-  sunset: {
-    name: "Sunset",
-    category: "color",
-    accent: "#F97316",
-    isDark: false,
-
-    primary: "#F97316",
-    primarySoft: "#FFEDD5",
-    primaryDark: "#EA580C",
-
-    background: "#FFF9F5",
-    surface: "#FFFFFF",
-    surfaceSecondary: "#FFF7ED",
-
-    text: "#431407",
-    textLight: "#FFFFFF",
-    mutedText: "#78716C",
-
-    border: "#FED7AA",
-
-    success: "#22C55E",
-    warning: "#F59E0B",
-    danger: "#DC2626",
-    info: "#FB923C",
-
-    shadow: "rgba(249,115,22,0.16)",
-    overlay: "rgba(67,20,7,0.35)",
-    disabled: "#D6D3D1",
-    placeholder: "#A8A29E",
-  },
-
-  rose: {
-    name: "Rose",
-    category: "color",
-    accent: "#F43F5E",
-    isDark: false,
-
-    primary: "#E11D48",
-    primarySoft: "#FFE4E6",
-    primaryDark: "#BE123C",
-
-    background: "#FFF5F7",
-    surface: "#FFFFFF",
-    surfaceSecondary: "#FFF1F2",
-
-    text: "#4C0519",
-    textLight: "#FFFFFF",
-    mutedText: "#71717A",
-
-    border: "#FECDD3",
-
-    success: "#22C55E",
-    warning: "#F59E0B",
-    danger: "#DC2626",
-    info: "#FB7185",
-
-    shadow: "rgba(225,29,72,0.16)",
-    overlay: "rgba(76,5,25,0.35)",
-    disabled: "#D4D4D8",
-    placeholder: "#A1A1AA",
-  },
-
-  aqua: {
-    name: "Aqua",
-    category: "color",
-    accent: "#22D3EE",
-    isDark: false,
-
-    primary: "#06B6D4",
-    primarySoft: "#CFFAFE",
-    primaryDark: "#0891B2",
-
-    background: "#F0FDFF",
-    surface: "#FFFFFF",
-    surfaceSecondary: "#ECFEFF",
-
-    text: "#083344",
-    textLight: "#FFFFFF",
-    mutedText: "#6B7280",
-
-    border: "#A5F3FC",
-
-    success: "#10B981",
-    warning: "#F59E0B",
-    danger: "#EF4444",
-    info: "#0284C7",
-
-    shadow: "rgba(6,182,212,0.16)",
-    overlay: "rgba(8,51,68,0.35)",
-    disabled: "#D1D5DB",
-    placeholder: "#94A3B8",
-  },
-
-  midnight: {
-    name: "Midnight",
-    category: "color",
+export const themes = {
+  dark: {
     accent: "#1e2224",
-    isDark: true,
-
-    primary: "#38BDF8", // Sky blue
-    primarySoft: "rgba(56,189,248,0.16)",
-    primaryDark: "#0EA5E9",
-
-    background: "#020617", // Very dark navy
+    background: "#1e2224",
     surface: "#0F172A",
-    surfaceSecondary: "#1E293B",
-
-    text: "#F8FAFC",
-    textLight: "#FFFFFF",
-    mutedText: "#94A3B8",
-
-    border: "rgba(148,163,184,0.15)",
-
-    success: "#22C55E",
-    warning: "#FBBF24",
-    danger: "#EF4444",
-    info: "#38BDF8",
-
-    shadow: "rgba(0,0,0,0.50)",
-    overlay: "rgba(0,0,0,0.70)",
-    disabled: "#334155",
-    placeholder: "#64748B",
+    border: "#334155",
+    primary: "#38BDF8",
+    primaryContainer: "#0369A1",
+    textPrimary: "#F8FAFC",
+    textSecondary: "#94A3B8",
+    textMuted: "#64748B",
+    textOnPrimary: "#0F172A",
+    success: "#4DE800",
+    error: "#F87171",
+    backgroundImage: null,
   },
 
-  yellow: {
-    name: "Yellow",
-    category: "color",
-    accent: "#FACC15",
-    isDark: false,
-
-    primary: "#EAB308",
-    primarySoft: "#FEF9C3", // Light yellow tint (matches your Aqua primarySoft style)
-    primaryDark: "#CA8A04",
-
-    background: "#FFFDF2", //
-
+  blue: {
+    accent: "#0284C7",
+    background: "#F0F9FF",
     surface: "#FFFFFF",
-    surfaceSecondary: "#FEF9C3",
-
-    text: "#422006", // Deep brown-yellow for readability
-    textLight: "#FFFFFF",
-    mutedText: "#71717A",
-
-    border: "#FEF08A", // Soft yellow border (matches your Aqua A5F3FC style)
-
-    success: "#10B981",
-    warning: "#F59E0B",
-    danger: "#EF4444",
-    info: "#06B6D4",
-
-    shadow: "rgba(234,179,8,0.12)",
-    overlay: "rgba(66,32,6,0.35)",
-    disabled: "#D1D5DB",
-    placeholder: "#94A3B8",
-  },
-} satisfies Record<string, ThemeOption>;
-
-//
-// TEXTURES
-//
-
-export const textures = {
-  cotton: {
-    name: "Cotton",
-    category: "texture",
-    accent: "#5B7C63",
-    isDark: false,
-
-    backgroundImage: require("../assets/textures/cotton-fabric-texture.jpg"),
-
-    primary: "#6D8B74",
-    primarySoft: "#EEF6F0",
-    primaryDark: "#3F5F46",
-
-    background: "#FAFBF8",
-    surface: "rgba(255,255,255,0.90)",
-    surfaceSecondary: "rgba(248,250,248,0.92)",
-
-    text: "#243326",
-    textLight: "#FFFFFF",
-    mutedText: "#69776B",
-
-    border: "#DEE8DF",
-
-    success: "#10B981",
-    warning: "#F59E0B",
-    danger: "#EF4444",
-    info: "#0EA5E9",
-
-    shadow: "rgba(0,0,0,0.08)",
-    overlay: "rgba(0,0,0,0.12)",
-    disabled: "#D1D5DB",
-    placeholder: "#9CA3AF",
-  },
-
-  paper: {
-    name: "Paper",
-    category: "texture",
-    accent: "#475569",
-    isDark: false,
-
-    backgroundImage: require("../assets/textures/paper-white-texture.jpg"),
-
-    primary: "#64748B",
-    primarySoft: "#F8FAFC",
-    primaryDark: "#334155",
-
-    background: "#FBFAF6",
-    surface: "rgba(255,255,255,0.92)",
-    surfaceSecondary: "rgba(248,250,252,0.95)",
-
-    text: "#1E293B",
-    textLight: "#FFFFFF",
-    mutedText: "#64748B",
-
-    border: "#E2E8F0",
-
+    border: "#E0F2FE",
+    primary: "#0284C7",
+    primaryContainer: "#E0F2FE",
+    textPrimary: "#0C4A6E",
+    textSecondary: "#0369A1",
+    textMuted: "#38BDF8",
+    textOnPrimary: "#FFFFFF",
     success: "#16A34A",
-    warning: "#F59E0B",
-    danger: "#DC2626",
-    info: "#0284C7",
-
-    shadow: "rgba(0,0,0,0.08)",
-    overlay: "rgba(0,0,0,0.10)",
-    disabled: "#CBD5E1",
-    placeholder: "#94A3B8",
+    error: "#DC2626",
+    backgroundImage: null,
   },
-
-  stone: {
-    name: "Stone",
-    category: "texture",
-    accent: "#334155",
-    isDark: false,
-
-    backgroundImage: require("../assets/textures/stone-wall-texture.jpg"),
-
-    primary: "#475569",
-    primarySoft: "#F1F5F9",
-    primaryDark: "#1E293B",
-
-    background: "#F3F4F6",
-    surface: "rgba(255,255,255,0.90)",
-    surfaceSecondary: "rgba(248,250,252,0.94)",
-
-    text: "#111827",
-    textLight: "#FFFFFF",
-    mutedText: "#6B7280",
-
-    border: "#D1D5DB",
-
+  green: {
+    accent: "#16A34A",
+    background: "#F0FDF4",
+    surface: "#FFFFFF",
+    border: "#DCFCE7",
+    primary: "#16A34A",
+    primaryContainer: "#DCFCE7",
+    textPrimary: "#14532D",
+    textSecondary: "#15803D",
+    textMuted: "#4ADE80",
+    textOnPrimary: "#FFFFFF",
+    success: "#22C55E",
+    error: "#EF4444",
+    backgroundImage: null,
+  },
+  red: {
+    accent: "#DC2626",
+    background: "#FFF5F5",
+    surface: "#FFFFFF",
+    border: "#FEE2E2",
+    primary: "#DC2626",
+    primaryContainer: "#FEE2E2",
+    textPrimary: "#450A0A",
+    textSecondary: "#991B1B",
+    textMuted: "#F87171",
+    textOnPrimary: "#FFFFFF",
+    success: "#16A34A",
+    error: "#EF4444",
+    backgroundImage: null,
+  },
+  orange: {
+    accent: "#EA580C",
+    background: "#FFF7ED",
+    surface: "#FFFFFF",
+    border: "#FFEDD5",
+    primary: "#EA580C",
+    primaryContainer: "#FFEDD5",
+    textPrimary: "#431407",
+    textSecondary: "#9A3412",
+    textMuted: "#FB923C",
+    textOnPrimary: "#FFFFFF",
+    success: "#16A34A",
+    error: "#DC2626",
+    backgroundImage: null,
+  },
+  indigo: {
+    accent: "#4F46E5",
+    background: "#EEF2FF",
+    surface: "#FFFFFF",
+    border: "#E0E7FF",
+    primary: "#4F46E5",
+    primaryContainer: "#E0E7FF",
+    textPrimary: "#312E81",
+    textSecondary: "#4338CA",
+    textMuted: "#818CF8",
+    textOnPrimary: "#FFFFFF",
+    success: "#10B981",
+    error: "#EF4444",
+    backgroundImage: null,
+  },
+  cream: {
+    accent: "#A79277",
+    background: "#FDFBF7",
+    surface: "#FFFFFF",
+    border: "#F3EAD3",
+    primary: "#78350F",
+    primaryContainer: "#FEF3C7",
+    textPrimary: "#2D2219",
+    textSecondary: "#5F4D3C",
+    textMuted: "#A79277",
+    textOnPrimary: "#FDFBF7",
+    success: "#15803D",
+    error: "#B91C1C",
+    backgroundImage: null,
+  },
+  violet: {
+    accent: "#7C3AED",
+    background: "#FAF5FF",
+    surface: "#FFFFFF",
+    border: "#F3E8FF",
+    primary: "#7C3AED",
+    primaryContainer: "#F3E8FF",
+    textPrimary: "#2E1065",
+    textSecondary: "#5B21B6",
+    textMuted: "#A78BFA",
+    textOnPrimary: "#FFFFFF",
     success: "#059669",
-    warning: "#F59E0B",
-    danger: "#DC2626",
-    info: "#0EA5E9",
-
-    shadow: "rgba(0,0,0,0.10)",
-    overlay: "rgba(0,0,0,0.14)",
-    disabled: "#D1D5DB",
-    placeholder: "#9CA3AF",
-  },
-} satisfies Record<string, ThemeOption>;
-
-//
-// SCENERIES
-//
-
-export const sceneries = {
-  beach: {
-    name: "Coastal Sunset",
-    category: "scenery",
-    accent: "#F59E0B", // Sun orange accent
-    isDark: false,
-    backgroundImage: require("../assets/scenery/natural-beach-scenery.jpg"),
-
-    primary: "#0E7490", // Teal/Ocean blue
-    primarySoft: "#E0F7FA",
-    primaryDark: "#164E63",
-
-    background: "#FFF7ED", // Warm sunset glow
-    surface: "rgba(255, 255, 255, 0.85)",
-    surfaceSecondary: "rgba(224, 242, 254, 0.80)",
-
-    text: "#0C4A6E",
-    textLight: "#FFFFFF",
-    mutedText: "#64748B",
-
-    border: "rgba(14, 116, 144, 0.2)",
-    success: "#10B981",
-    warning: "#F59E0B",
-    danger: "#EF4444",
-    info: "#0EA5E9",
-
-    shadow: "rgba(0,0,0,0.12)",
-    overlay: "rgba(0,0,0,0.15)",
-    disabled: "#D1D5DB",
-    placeholder: "#94A3B8",
+    error: "#E11D48",
+    backgroundImage: null,
   },
 
-  autumnal: {
-    name: "Golden Autumn",
-    category: "scenery",
-    accent: "#EA580C", // Deep orange leaf accent
-    isDark: false,
-    backgroundImage: require("../assets/scenery/autumnal-landscape-scenery.jpg"),
-
-    primary: "#C2410C", // Rust orange
-    primarySoft: "#FFF7ED",
-    primaryDark: "#7C2D12",
-
-    background: "#F8FAF8", // Misty grey-white background
-    surface: "rgba(255, 255, 255, 0.88)",
-    surfaceSecondary: "rgba(255, 247, 237, 0.85)",
-
-    text: "#431407",
-    textLight: "#FFFFFF",
-    mutedText: "#78716C",
-
-    border: "rgba(194, 65, 12, 0.2)",
-    success: "#16A34A",
-    warning: "#F59E0B",
-    danger: "#DC2626",
-    info: "#0EA5E9",
-
-    shadow: "rgba(0,0,0,0.1)",
-    overlay: "rgba(0,0,0,0.1)",
-    disabled: "#E7E5E4",
-    placeholder: "#A8A29E",
-  },
-
-  pathway: {
-    name: "Green Pathway",
-    category: "scenery",
-    accent: "#84CC16",
-    isDark: false,
-    backgroundImage: require("../assets/scenery/pathway-middle-grassy-scenery.jpg"),
-
-    primary: "#4D7C0F",
-    primarySoft: "#F7FEE7",
-    primaryDark: "#365314",
-
-    background: "#F7FBEF",
-    surface: "rgba(255,255,255,0.84)",
-    surfaceSecondary: "rgba(247,254,231,0.86)",
-
-    text: "#1A2E05",
-    textLight: "#FFFFFF",
-    mutedText: "#647048",
-
-    border: "rgba(217,249,157,0.70)",
-    success: "#16A34A",
-    warning: "#F59E0B",
-    danger: "#DC2626",
-    info: "#0EA5E9",
-
-    shadow: "rgba(0,0,0,0.16)",
-    overlay: "rgba(0,0,0,0.18)",
-    disabled: "#D1D5DB",
-    placeholder: "#84CC16",
-  },
-
-  moonShore: {
-    name: "Midnight Shore",
-    category: "scenery",
-    accent: "#38BDF8", // Electric blue moon glow
-    isDark: true,
-    backgroundImage: require("../assets/scenery/rocky-shore-full-moon-scenery.jpg"),
-
-    primary: "#7DD3FC",
-    primarySoft: "rgba(12, 74, 110, 0.4)",
-    primaryDark: "#0369A1",
-
-    background: "#020617", // Deepest navy
-    surface: "rgba(15, 23, 42, 0.8)",
-    surfaceSecondary: "rgba(30, 41, 59, 0.6)",
-
-    text: "#F0F9FF",
-    textLight: "#FFFFFF",
-    mutedText: "#94A3B8",
-
-    border: "rgba(56, 189, 248, 0.15)",
-    success: "#22C55E",
-    warning: "#FBBF24",
-    danger: "#F87171",
-    info: "#38BDF8",
-
-    shadow: "rgba(0,0,0,0.5)",
-    overlay: "rgba(2, 6, 23, 0.5)",
-    disabled: "#1E293B",
-    placeholder: "#475569",
-  },
-
-  clear: {
-    name: "Milky Way Pier",
-    category: "scenery",
-    accent: "#FDBA74", // Warm light from the pier house
-    isDark: true,
-    backgroundImage: require("../assets/scenery/starry-clear-sky-scenery.jpg"),
-
-    primary: "#38BDF8", // Galactic blue
-    primarySoft: "rgba(56, 189, 248, 0.12)",
-    primaryDark: "#0EA5E9",
-
-    background: "#080C17",
-    surface: "rgba(15, 23, 42, 0.85)",
-    surfaceSecondary: "rgba(30, 41, 59, 0.7)",
-
-    text: "#F1F5F9",
-    textLight: "#FFFFFF",
-    mutedText: "#94A3B8",
-
-    border: "rgba(253, 186, 116, 0.2)", // Subtle glow border
-    success: "#22C55E",
-    warning: "#F59E0B",
-    danger: "#EF4444",
-    info: "#0EA5E9",
-
-    shadow: "rgba(0,0,0,0.6)",
-    overlay: "rgba(0, 0, 0, 0.4)",
-    disabled: "#1E293B",
-    placeholder: "#64748B",
-  },
+  // with background image
 
   starry: {
-    name: "Starlit Cabin",
-    category: "scenery",
-    accent: "#FACC15", // The warm yellow light in the cabin window
-    isDark: true,
-    backgroundImage: require("../assets/scenery/starry-sky-scenery.jpg"),
-
-    primary: "#818CF8", // Indigo sky
-    primarySoft: "rgba(129, 140, 248, 0.1)",
-    primaryDark: "#4F46E5",
-
-    background: "#050510",
-    surface: "rgba(17, 24, 39, 0.9)",
-    surfaceSecondary: "rgba(31, 41, 55, 0.7)",
-
-    text: "#E2E8F0",
-    textLight: "#FFFFFF",
-    mutedText: "#94A3B8",
-
-    border: "rgba(129, 140, 248, 0.2)",
-    success: "#22C55E",
-    warning: "#EAB308",
-    danger: "#F87171",
-    info: "#6366F1",
-
-    shadow: "rgba(0,0,0,0.6)",
-    overlay: "rgba(0, 0, 0, 0.45)",
-    disabled: "#111827",
-    placeholder: "#4B5563",
+    accent: "#DC2626",
+    background: "#FFF5F5",
+    surface: "#FFFFFF",
+    border: "#FEE2E2",
+    primary: "#DC2626",
+    primaryContainer: "#FEE2E2",
+    textPrimary: "#450A0A",
+    textSecondary: "#991B1B",
+    textMuted: "#F87171",
+    textOnPrimary: "#FFFFFF",
+    success: "#16A34A",
+    error: "#EF4444",
+    backgroundImage: require("../assets/scenery/pathway-middle-grassy-scenery.jpg"),
   },
-} satisfies Record<string, ThemeOption>;
-//
-// ALL THEMES
-//
+  starry2: {
+    accent: "#EA580C",
+    background: "#FFF7ED",
+    surface: "#FFFFFF",
+    border: "#FFEDD5",
+    primary: "#EA580C",
+    primaryContainer: "#FFEDD5",
+    textPrimary: "#431407",
+    textSecondary: "#9A3412",
+    textMuted: "#FB923C",
+    textOnPrimary: "#FFFFFF",
+    success: "#16A34A",
+    error: "#DC2626",
+    backgroundImage: require("../assets/scenery/pathway-middle-grassy-scenery.jpg"),
+  },
+  in2digo: {
+    accent: "#4F46E5",
+    background: "#EEF2FF",
+    surface: "#FFFFFF",
+    border: "#E0E7FF",
+    primary: "#4F46E5",
+    primaryContainer: "#E0E7FF",
+    textPrimary: "#312E81",
+    textSecondary: "#4338CA",
+    textMuted: "#818CF8",
+    textOnPrimary: "#FFFFFF",
+    success: "#10B981",
+    error: "#EF4444",
+    backgroundImage: require("../assets/scenery/pathway-middle-grassy-scenery.jpg"),
+  },
+  starry3: {
+    accent: "#A79277",
+    background: "#FDFBF7",
+    surface: "#FFFFFF",
+    border: "#F3EAD3",
+    primary: "#78350F",
+    primaryContainer: "#FEF3C7",
+    textPrimary: "#2D2219",
+    textSecondary: "#5F4D3C",
+    textMuted: "#A79277",
+    textOnPrimary: "#FDFBF7",
+    success: "#15803D",
+    error: "#B91C1C",
+    backgroundImage: require("../assets/scenery/pathway-middle-grassy-scenery.jpg"),
+  },
+  starry4: {
+    accent: "#7C3AED",
+    background: "#FAF5FF",
+    surface: "#FFFFFF",
+    border: "#F3E8FF",
+    primary: "#7C3AED",
+    primaryContainer: "#F3E8FF",
+    textPrimary: "#2E1065",
+    textSecondary: "#5B21B6",
+    textMuted: "#A78BFA",
+    textOnPrimary: "#FFFFFF",
+    success: "#059669",
+    error: "#E11D48",
+    backgroundImage: require("../assets/scenery/pathway-middle-grassy-scenery.jpg"),
+  },
+} as const;
 
-export const allThemes = {
-  ...colors,
-  ...textures,
-  ...sceneries,
-};
+export type ThemeName = keyof typeof themes;
 
-//
-// TYPES
-//
+interface ThemeContextType {
+  theme: ThemeColors;
+  activeTheme: ThemeName;
+  setActiveTheme: (theme: ThemeName) => void;
+}
 
-export type ColorName = keyof typeof colors;
-export type TextureName = keyof typeof textures;
-export type SceneryName = keyof typeof sceneries;
-export type AppThemeName = keyof typeof allThemes;
-
-//
-// CONTEXT TYPE
-//
-
-type ThemeContextType = {
-  theme: ThemeOption;
-
-  activeTheme: AppThemeName;
-  setActiveTheme: (theme: AppThemeName) => void;
-
-  selectedThemeType: ThemeCategory;
-
-  themes: typeof allThemes;
-
-  colors: typeof colors;
-  textures: typeof textures;
-  sceneries: typeof sceneries;
-};
-
-//
-// CONTEXT
-//
+interface ThemeProviderProps {
+  children: ReactNode;
+}
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-//
-// PROVIDER
-//
+export const ThemeProvider = ({ children }: ThemeProviderProps) => {
+  const [activeTheme, setActiveTheme] = useState<ThemeName>("red");
 
-export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [activeTheme, setActiveTheme] = useState<AppThemeName>("ocean");
-
-  const value = useMemo(() => {
-    const theme = allThemes[activeTheme];
-
-    return {
-      theme,
-
+  // Memoize
+  const value = useMemo(
+    () => ({
+      theme: themes[activeTheme],
       activeTheme,
       setActiveTheme,
-
-      selectedThemeType: theme.category,
-
-      themes: allThemes,
-
-      colors,
-      textures,
-      sceneries,
-    };
-  }, [activeTheme]);
+    }),
+    [activeTheme],
+  );
 
   return (
     <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );
 };
 
-//
-// HOOK
-//
-
 export const useTheme = () => {
   const context = useContext(ThemeContext);
 
   if (!context) {
-    throw new Error("useTheme must be used inside ThemeProvider");
+    throw new Error("useTheme must be used inside a ThemeProvider");
   }
 
   return context;
