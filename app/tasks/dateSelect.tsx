@@ -2,11 +2,10 @@ import { Feather, MaterialIcons } from "@expo/vector-icons";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Pressable, Text, useWindowDimensions, View } from "react-native";
 
-import { PaperProvider } from "react-native-paper";
 import { TimePickerModal } from "react-native-paper-dates";
 
+import { useTheme } from "@/context/ThemeContext";
 import { CalendarList, DateData } from "react-native-calendars";
-
 type Props = {
   selectedDate: string;
   selectedTime: string | null;
@@ -14,12 +13,34 @@ type Props = {
   onCancel: () => void;
 };
 
+import { MD3LightTheme, PaperProvider } from "react-native-paper";
+
 export default function DateSelect({
   onConfirm,
   onCancel,
   selectedDate,
   selectedTime,
 }: Props) {
+  const { theme } = useTheme();
+
+  const paperTheme = {
+    ...MD3LightTheme,
+    colors: {
+      ...MD3LightTheme.colors,
+      primary: theme.primary,
+      onPrimary: theme.primary,
+      primaryContainer: theme.primaryContainer,
+      onPrimaryContainer: theme.textOnPrimary,
+      background: theme.background,
+      onBackground: theme.textPrimary,
+      surface: theme.surface,
+      onSurface: theme.textPrimary,
+      surfaceVariant: theme.primaryContainer,
+      onSurfaceVariant: theme.textSecondary,
+      outline: theme.border,
+    },
+  };
+
   const { width: screenWidth } = useWindowDimensions();
 
   const CALENDAR_WIDTH = useMemo(() => screenWidth - 60, [screenWidth]);
@@ -84,8 +105,7 @@ export default function DateSelect({
 
   return (
     <View>
-      {/* theme={customTheme} */}
-      <PaperProvider>
+      <PaperProvider theme={paperTheme}>
         <TimePickerModal
           visible={isTimeModalVisible}
           onDismiss={onDismiss}
@@ -112,76 +132,51 @@ export default function DateSelect({
         staticHeader={true}
         onDayPress={(day: DateData) => setTempDate(day.dateString)}
         theme={{
-          calendarBackground: "#ffffff",
+          calendarBackground: theme.surface,
+          monthTextColor: theme.textPrimary,
+          dayTextColor: theme.textPrimary,
+          textSectionTitleColor: theme.textMuted,
+          textDisabledColor: theme.textMuted,
+          arrowColor: theme.primary,
           textDayFontSize: 14,
           textMonthFontSize: 14,
           textMonthFontWeight: "bold",
-          todayTextColor: "#ff0000",
-          selectedDayBackgroundColor: "#4A90E2",
-          selectedDayTextColor: "#ffffff",
+          todayTextColor: theme.primary,
+          selectedDayBackgroundColor: theme.primary,
+          selectedDayTextColor: theme.textOnPrimary,
         }}
         markedDates={
           tempDate
             ? {
                 [tempDate]: {
                   selected: true,
-                  selectedColor: "#4A90E2",
-                  selectedTextColor: "#ffffff",
+                  selectedColor: theme.primary,
+                  selectedTextColor: theme.textOnPrimary,
                 },
               }
             : {}
         }
       />
 
-      {/* <CalendarList
-        horizontal={true}
-        pagingEnabled
-        // calendarWidth={screenWidth}
-        // calendarHeight={300}
-        hideArrows={false}
-        hideExtraDays={false}
-        scrollEnabled={true}
-        showScrollIndicator={false}
-        calendarWidth={300}
-        onDayPress={(day) => setSelectedDate(day.dateString)}
-        // Theme Styling
-        theme={{
-          calendarBackground: "#ffffff",
-          textDayFontSize: 14,
-          textDayFontWeight: "400",
-          textDayFontFamily: "System",
-          textMonthFontSize: 14,
-          textMonthFontWeight: "bold",
-          textDayHeaderFontSize: 12,
-          textDayHeaderFontWeight: "600",
-          dayTextColor: "#2d4150",
-          monthTextColor: "#000000",
-          textSectionTitleColor: "#b6c1cd",
-          todayTextColor: "#ff0000",
-          selectedDayBackgroundColor: "#4A90E2",
-          selectedDayTextColor: "#ffffff",
-          //   dotColor: "orange",
-          //   selectedDotColor: "#ffffff",
-        }}
-        // Marks the selected date
-        markedDates={{
-          [selectedDate]: {
-            selected: true,
-            selectedColor: "#4A90E2",
-            selectedTextColor: "#ffffff",
-            // dotColor: "orange",
-            // marked: true,
-          },
-        }}
-      /> */}
-
-      <View className="flex flex-row p-4 w-full gap-3 flex-wrap ">
+      <View
+        className="flex flex-row p-4 w-full gap-3 flex-wrap "
+        style={{ backgroundColor: theme.surface }}
+      >
         <Pressable
           onPress={() => setTempDate(today)}
-          className={`px-3 rounded-md  text-white ${tempDate === today ? "bg-blue-400" : "bg-gray-200"} `}
+          className="px-3 rounded-md"
+          style={{
+            backgroundColor:
+              tempDate === today ? theme.primary : theme.primaryContainer,
+            borderWidth: 1,
+            borderColor: theme.border,
+          }}
         >
           <Text
-            className={` py-3 text-sm px-2 ${tempDate === today ? "text-white" : "text-gray-500"} `}
+            className="py-3 text-sm px-2 font-medium"
+            style={{
+              color: tempDate === today ? theme.textPrimary : theme.textMuted,
+            }}
           >
             Today
           </Text>
@@ -189,10 +184,20 @@ export default function DateSelect({
 
         <Pressable
           onPress={() => setTempDate(tomorrow)}
-          className={`px-3 rounded-md  text-white ${tempDate === tomorrow ? "bg-blue-400" : "bg-gray-200"} `}
+          className="px-3 rounded-md"
+          style={{
+            backgroundColor:
+              tempDate === tomorrow ? theme.primary : theme.primaryContainer,
+            borderWidth: 1,
+            borderColor: theme.border,
+          }}
         >
           <Text
-            className={` py-3 text-sm px-2 ${tempDate === tomorrow ? "text-white" : "text-gray-500"} `}
+            className="py-3 text-sm px-2 font-medium"
+            style={{
+              color:
+                tempDate === tomorrow ? theme.textPrimary : theme.textMuted,
+            }}
           >
             Tomorrow
           </Text>
@@ -200,10 +205,24 @@ export default function DateSelect({
 
         <Pressable
           onPress={() => setTempDate(threeDaysLater)}
-          className={`px-3 rounded-md  text-white ${tempDate === threeDaysLater ? "bg-blue-400" : "bg-gray-200"} `}
+          className="px-3 rounded-md"
+          style={{
+            backgroundColor:
+              tempDate === threeDaysLater
+                ? theme.primary
+                : theme.primaryContainer,
+            borderWidth: 1,
+            borderColor: theme.border,
+          }}
         >
           <Text
-            className={` py-3 text-sm px-2 ${tempDate === threeDaysLater ? "text-white" : "text-gray-500"} `}
+            className="py-3 text-sm px-2 font-medium"
+            style={{
+              color:
+                tempDate === threeDaysLater
+                  ? theme.textPrimary
+                  : theme.textMuted,
+            }}
           >
             3 Days Later
           </Text>
@@ -211,17 +230,30 @@ export default function DateSelect({
 
         <Pressable
           onPress={() => setTempDate(thisSunday)}
-          className={`px-3 rounded-md  text-white ${tempDate === thisSunday ? "bg-blue-400" : "bg-gray-200"} `}
+          className="px-3 rounded-md"
+          style={{
+            backgroundColor:
+              tempDate === thisSunday ? theme.primary : theme.primaryContainer,
+            borderWidth: 1,
+            borderColor: theme.border,
+          }}
         >
           <Text
-            className={` py-3 text-sm px-2 ${tempDate === thisSunday ? "text-white" : "text-gray-500"} `}
+            className="py-3 text-sm px-2 font-medium"
+            style={{
+              color:
+                tempDate === thisSunday ? theme.textPrimary : theme.textMuted,
+            }}
           >
             This Sunday
           </Text>
         </Pressable>
       </View>
 
-      <View className="bg-white px-4 rounded-xl">
+      <View
+        className=" px-4 rounded-xl"
+        style={{ backgroundColor: theme.surface }}
+      >
         {/* Time */}
 
         <Pressable
@@ -260,12 +292,18 @@ export default function DateSelect({
 
       <View className="flex flex-row gap-4 items-end justify-end  mt-4 p-2">
         <Pressable onPress={onCancel}>
-          <Text className="text-blue-400 font-semibold capitalize text-lg">
+          <Text
+            className=" font-semibold capitalize text-lg"
+            style={{ color: theme.textMuted }}
+          >
             CANCEL
           </Text>
         </Pressable>
         <Pressable onPress={() => onConfirm(tempDate, tempTime)}>
-          <Text className="text-blue-400 font-semibold capitalize text-lg">
+          <Text
+            className=" font-semibold capitalize text-lg"
+            style={{ color: theme.textMuted }}
+          >
             DONE
           </Text>
         </Pressable>

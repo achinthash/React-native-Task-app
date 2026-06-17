@@ -1,6 +1,5 @@
 const { width } = Dimensions.get("window");
 const COLOR_SIZE = width / 5;
-const TEXTURE_SIZE = (width - 56) / 4;
 const SCENERY_WIDTH = (width - 40) / 2;
 
 const styles = StyleSheet.create({

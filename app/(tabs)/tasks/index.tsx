@@ -60,6 +60,7 @@ export default function Tasks() {
 
   const content = (
     <SafeAreaView className="flex-1" edges={["top"]}>
+      {/*Floating new task button  */}
       <View className="absolute bottom-6 right-6 z-10">
         <Pressable
           className="rounded-full p-5"
@@ -105,7 +106,7 @@ export default function Tasks() {
     <ImageBackground
       style={{ flex: 1 }}
       source={theme.backgroundImage}
-      resizeMode={theme.category === "texture" ? "repeat" : "cover"}
+      resizeMode="cover"
     >
       <View
         style={{

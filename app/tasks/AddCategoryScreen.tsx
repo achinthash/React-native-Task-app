@@ -8,12 +8,15 @@ import {
   View,
 } from "react-native";
 
+import { useTheme } from "@/context/ThemeContext";
 import { createCategory } from "@/database/tasksService";
 import { Ionicons } from "@expo/vector-icons";
 import type { ComponentProps } from "react";
 import { useState } from "react";
 
 export default function AddCategoryScreen({ onDone, onCancel }: any) {
+  const { theme } = useTheme();
+
   type IconName = ComponentProps<typeof Ionicons>["name"];
   const ICONSNAMES: IconName[] = [
     "briefcase",
@@ -79,23 +82,33 @@ export default function AddCategoryScreen({ onDone, onCancel }: any) {
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} className="">
-      <Text className="mb-1 font-bold text-center  text-[24px]">
+      <Text
+        className="mb-1 font-bold text-center  text-[24px]"
+        style={{ color: theme.textPrimary }}
+      >
         Create Category
       </Text>
 
-      <Text className="text-base font-semibold mt-4 mb-1 color-[#374151]">
+      <Text
+        className="text-base font-semibold mt-4 mb-1 "
+        style={{ color: theme.textMuted }}
+      >
         Category Name
       </Text>
       <TextInput
-        className="border border-[#E5E7EB] rounded-xl p-4 text-base "
+        className="border rounded-xl p-4 text-base "
         value={name}
         onChangeText={setName}
         placeholder="e.g. Study, Work"
-        placeholderTextColor="#9CA3AF"
+        placeholderTextColor={theme.textMuted}
+        style={{ color: theme.textSecondary, borderColor: theme.border }}
       />
 
       {/* Choose Icon */}
-      <Text className="text-base font-semibold mt-4 mb-1 color-[#374151]">
+      <Text
+        className="text-base font-semibold mt-4 mb-1 "
+        style={{ color: theme.textMuted }}
+      >
         Choose Icon
       </Text>
 
@@ -136,7 +149,10 @@ export default function AddCategoryScreen({ onDone, onCancel }: any) {
       </ScrollView>
 
       {/*  Choose Color */}
-      <Text className="text-base font-semibold mt-4 mb-1 color-[#374151]">
+      <Text
+        className="text-base font-semibold mt-4 mb-1 "
+        style={{ color: theme.textMuted }}
+      >
         Choose Color
       </Text>
 
@@ -173,7 +189,10 @@ export default function AddCategoryScreen({ onDone, onCancel }: any) {
       </ScrollView>
 
       {/* PREVIEW */}
-      <Text className="text-base font-semibold mt-4 mb-1 color-[#374151]">
+      <Text
+        className="text-base font-semibold mt-4 mb-1 "
+        style={{ color: theme.textMuted }}
+      >
         Preview
       </Text>
 
@@ -192,12 +211,18 @@ export default function AddCategoryScreen({ onDone, onCancel }: any) {
 
       <View className="flex flex-row gap-4 items-end justify-end  mt-4 p-2">
         <Pressable onPress={onCancel}>
-          <Text className="text-blue-400 font-semibold capitalize text-lg">
+          <Text
+            className=" font-semibold capitalize text-lg "
+            style={{ color: theme.textMuted }}
+          >
             CANCEL
           </Text>
         </Pressable>
         <Pressable onPress={handleSave}>
-          <Text className="text-blue-400 font-semibold capitalize text-lg">
+          <Text
+            className="font-semibold capitalize text-lg"
+            style={{ color: theme.textMuted }}
+          >
             DONE
           </Text>
         </Pressable>
