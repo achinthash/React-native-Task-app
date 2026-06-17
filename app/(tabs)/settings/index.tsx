@@ -53,11 +53,7 @@ export default function Settings() {
         <TouchableOpacity className="flex-row items-center justify-between p-4    ">
           <View className="flex-row items-center gap-4">
             <View style={iconBoxStyle}>
-              <MaterialIcons
-                name="account-circle"
-                size={22}
-                color={iconColor}
-              />
+              <MaterialIcons name="notifications" size={22} color={iconColor} />
             </View>
             <Text style={itemTextStyle}>Notification</Text>
           </View>
@@ -71,11 +67,7 @@ export default function Settings() {
         <TouchableOpacity className="flex-row items-center justify-between p-4    ">
           <View className="flex-row items-center gap-4">
             <View style={iconBoxStyle}>
-              <MaterialIcons
-                name="account-circle"
-                size={22}
-                color={iconColor}
-              />
+              <MaterialIcons name="schedule" size={22} color={iconColor} />
             </View>
             <Text style={itemTextStyle}>Schedule View</Text>
           </View>
@@ -88,11 +80,7 @@ export default function Settings() {
         >
           <View className="flex-row items-center gap-4">
             <View style={iconBoxStyle}>
-              <MaterialIcons
-                name="account-circle"
-                size={22}
-                color={iconColor}
-              />
+              <MaterialIcons name="label" size={22} color={iconColor} />
             </View>
             <Text style={itemTextStyle}>Categories</Text>
           </View>
@@ -105,11 +93,7 @@ export default function Settings() {
         >
           <View className="flex-row items-center gap-4">
             <View style={iconBoxStyle}>
-              <MaterialIcons
-                name="account-circle"
-                size={22}
-                color={iconColor}
-              />
+              <MaterialIcons name="palette" size={22} color={iconColor} />
             </View>
             <Text style={itemTextStyle}>Theme</Text>
           </View>
@@ -126,11 +110,7 @@ export default function Settings() {
         >
           <View className="flex-row items-center gap-4">
             <View style={iconBoxStyle}>
-              <MaterialIcons
-                name="account-circle"
-                size={22}
-                color={iconColor}
-              />
+              <MaterialIcons name="info" size={22} color={iconColor} />
             </View>
             <Text style={itemTextStyle}>About App</Text>
           </View>
@@ -143,11 +123,7 @@ export default function Settings() {
         >
           <View className="flex-row items-center gap-4">
             <View style={iconBoxStyle}>
-              <MaterialIcons
-                name="account-circle"
-                size={22}
-                color={iconColor}
-              />
+              <MaterialIcons name="support" size={22} color={iconColor} />
             </View>
             <Text style={itemTextStyle}>Help & Support</Text>
           </View>
