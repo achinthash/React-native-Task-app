@@ -29,6 +29,8 @@ export default function SettingsLayout() {
 
       <Stack.Screen name="categories" options={{ title: "Categories" }} />
       <Stack.Screen name="theme" options={{ title: "Themes" }} />
+      <Stack.Screen name="about" options={{ title: "About" }} />
+      <Stack.Screen name="support" options={{ title: "Support" }} />
     </Stack>
   );
 }

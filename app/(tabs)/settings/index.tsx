@@ -120,7 +120,10 @@ export default function Settings() {
       <Text style={sectionTextStyle}> ABOUT </Text>
 
       <View style={cardStyle}>
-        <TouchableOpacity className="flex-row items-center justify-between p-4    ">
+        <TouchableOpacity
+          onPress={() => router.push("/settings/about")}
+          className="flex-row items-center justify-between p-4    "
+        >
           <View className="flex-row items-center gap-4">
             <View style={iconBoxStyle}>
               <MaterialIcons
@@ -134,7 +137,10 @@ export default function Settings() {
           <MaterialIcons name="chevron-right" size={22} color={chevronColor} />
         </TouchableOpacity>
 
-        <TouchableOpacity className="flex-row items-center justify-between p-4    ">
+        <TouchableOpacity
+          onPress={() => router.push("/settings/support")}
+          className="flex-row items-center justify-between p-4    "
+        >
           <View className="flex-row items-center gap-4">
             <View style={iconBoxStyle}>
               <MaterialIcons
