@@ -10,7 +10,7 @@ export default function Layout() {
       screenOptions={{
         tabBarActiveTintColor: theme.primary,
 
-        tabBarInactiveTintColor: theme.textPrimary,
+        tabBarInactiveTintColor: theme.textMuted,
         tabBarStyle: {
           backgroundColor: theme.surface,
           borderTopWidth: 0,

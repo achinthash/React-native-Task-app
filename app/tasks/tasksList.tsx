@@ -290,6 +290,11 @@ export default function TasksList() {
       PRIORITY_CONFIG[item.priority as keyof typeof PRIORITY_CONFIG] ??
       PRIORITY_CONFIG[0];
 
+    const safeTime =
+      item.time && item.time !== "null" && item.time !== "undefined"
+        ? item.time
+        : null;
+
     return (
       <TouchableOpacity
         onPress={() => taskDetails(item.id)}
@@ -388,7 +393,8 @@ export default function TasksList() {
                   />
                   <Text style={[styles.dateText, { color: theme.textPrimary }]}>
                     {item.scheduled_date}
-                    {item.time ? ` : ${item.time}` : ""}
+
+                    {safeTime ? ` : ${safeTime}` : ""}
                   </Text>
                 </View>
               </View>
@@ -508,8 +514,8 @@ const styles = StyleSheet.create({
   },
   taskRow: { flexDirection: "row", alignItems: "center" },
   statusButton: {
-    width: 38,
-    height: 38,
+    width: 28,
+    height: 28,
     borderRadius: 19,
     borderWidth: 1,
     justifyContent: "center",

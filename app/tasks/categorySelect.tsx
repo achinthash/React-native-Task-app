@@ -59,7 +59,7 @@ export default function CategorySelect({
           {/* INSIDE (prevent close) */}
           <Pressable
             onPress={(e) => e.stopPropagation()}
-            style={styles.modalContainer}
+            style={[styles.modalContainer, { backgroundColor: theme.surface }]}
           >
             <AddCategoryScreen
               onCancel={() => setIsNewCategoryModalVisible(false)}
@@ -172,7 +172,6 @@ const styles = StyleSheet.create({
   modalContainer: {
     width: "90%",
     maxHeight: "75%",
-    backgroundColor: "#fff",
     borderRadius: 20,
     padding: 16,
   },
